@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* VetiNet - Soft Flat Palette */
+
+    /* Core Colors converted to HSL for Tailwind opacity support */
+    /* Veti Blue: #6D9DC5 -> H:207, S:43%, L:60% */
+    --primary: 207 43% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Veti Mint: #8BD7BA -> H:157, S:49%, L:69% */
+    --secondary: 157 49% 69%;
+    --secondary-foreground: 210 23% 38%;
+    /* Dark Slate for contrast on mint */
+
+    /* Dark Slate: #4A6076 -> H:210, S:23%, L:38% */
+    --foreground: 210 23% 38%;
+
+    /* Soft Gray: #F4F7F9 -> H:204, S:27%, L:97% */
+    --background: 204 27% 97%;
+
+    /* White Cards */
+    --card: 0 0% 100%;
+    --card-foreground: 210 23% 38%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 23% 38%;
+
+    /* Text Light: #9BA9B9 */
+    --muted: 210 23% 90%;
+    /* Much lighter for backgrounds */
+    --muted-foreground: 212 17% 67%;
+    /* #9BA9B9 */
+
+    /* Accent (Reusing Mint or a variation) */
+    --accent: 157 49% 69%;
+    --accent-foreground: 210 23% 38%;
+
+    /* Semantic */
+    --destructive: 0 66% 67%;
+    /* #E57373 */
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 212 17% 85%;
+    /* Soft border */
+    --input: 212 17% 85%;
+    --ring: 207 43% 60%;
+    /* Primary Blue Ring */
+
+    --radius: 1rem;
+    /* 16px for Soft Flat look */
+  }
+
+  .dark {
+    /* Deep Elite Dark Mode */
+    --background: 222 47% 2%; /* Deepened Slate */
+    --foreground: 210 40% 98%;
+    --card: 222 47% 4%;     /* Deepened Card */
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 4%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 207 43% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 157 49% 69%;
+    --secondary-foreground: 222 47% 4%;
+    --muted: 217 32% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 32% 17%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 32% 17%;
+    --input: 217 32% 17%;
+    --ring: 207 43% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Updated Utilities for Soft Flat */
+.glass-panel {
+  /* Removed blur/transparency for flat opaque cards as requested */
+  @apply bg-card rounded-2xl border border-transparent;
+  box-shadow: 0 4px 20px -4px rgba(74, 96, 118, 0.05);
+}
+
+.heading-font {
+  font-family: var(--font-nunito);
+}
+
+.body-font {
+  font-family: var(--font-inter);
+}
