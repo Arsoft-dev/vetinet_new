@@ -570,6 +570,7 @@ export function POSWorkspaceThreeColumn({ exchangeRate }: { exchangeRate: number
             <PaymentModal
                 isOpen={isPaymentModalOpen}
                 onClose={() => setIsPaymentModalOpen(false)}
+                clientId={client?.id || ""}
                 totalUSD={total}
                 exchangeRate={exchangeRate}
                 items={cart.map(i => ({ productId: i.product_id, name: i.name, quantity: i.quantity, unitPrice: i.price, fromConsultation: i.fromConsultation }))}

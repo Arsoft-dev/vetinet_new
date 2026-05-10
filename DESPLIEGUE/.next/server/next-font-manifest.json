@@ -1,0 +1,147 @@
+{
+  "app": {
+    "[project]/src/app/(public)/contacto/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/(public)/cookies/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/(public)/nosotros/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/(public)/pet/[token]/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/(public)/privacidad/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/(public)/terminos/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/_not-found/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/dashboard/billing/cash/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/dashboard/billing/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/dashboard/billing/pos/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/dashboard/calendar/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/dashboard/consultations/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/dashboard/hospital/[id]/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/dashboard/hospital/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/dashboard/inventory/movements/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/dashboard/inventory/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/dashboard/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/dashboard/patients/[id]/edit/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/dashboard/patients/[id]/new-consultation/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/dashboard/patients/[id]/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/dashboard/patients/new/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/dashboard/patients/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/dashboard/print/cash-close/[id]/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/dashboard/print/consultation/[id]/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/dashboard/print/invoice/[id]/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/dashboard/settings/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/dashboard/treatments/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/login/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/print/consultation/[id]/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/print/hospitalization/[id]/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/print/patient-history/[id]/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/share/[token]/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/superadmin/clinics/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ],
+    "[project]/src/app/superadmin/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/07454f8ad8aaac57-s.p.fc65572f.woff2"
+    ]
+  },
+  "appUsingSizeAdjust": true,
+  "pages": {},
+  "pagesUsingSizeAdjust": false
+}

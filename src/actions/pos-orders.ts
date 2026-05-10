@@ -65,20 +65,20 @@ export async function getPendingOrders() {
             medicalRecordId: record.id,
             date: record.visit_date,
             reason: record.reason,
-            vetName: record.vet?.full_name || 'Dr. Vet',
-            petName: record.pet?.name || 'Mascota',
-            client: record.pet?.client ? {
-                id: record.pet.client.id,
-                name: record.pet.client.full_name,
-                doc: record.pet.client.identification_doc
+            vetName: (record.vet as any)?.full_name || 'Dr. Vet',
+            petName: (record.pet as any)?.name || 'Mascota',
+            client: (record.pet as any)?.client ? {
+                id: (record.pet as any).client.id,
+                name: (record.pet as any).client.full_name,
+                doc: (record.pet as any).client.identification_doc
             } : null,
             items: items.map(item => ({
                 id: item.id,
                 productId: item.product_id,
-                name: item.product?.name || 'Producto General',
+                name: (item.product as any)?.name || 'Producto General',
                 quantity: item.quantity,
                 unitPrice: item.unit_price,
-                category: item.product?.category || 'Service',
+                category: (item.product as any)?.category || 'Service',
                 fromConsultation: true // Flag clave para no descontar inventario
             }))
         });

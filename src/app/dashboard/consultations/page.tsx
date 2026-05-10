@@ -24,6 +24,12 @@ export default async function ConsultationsPage() {
         .eq("is_deceased", false)
         .order("name", { ascending: true });
 
+    // Transform data to ensure 'clients' is an object and not an array for TS
+    const processedPets = (pets || []).map((pet: any) => ({
+        ...pet,
+        clients: Array.isArray(pet.clients) ? pet.clients[0] : pet.clients
+    }));
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -38,7 +44,7 @@ export default async function ConsultationsPage() {
             </div>
 
             {/* List with Search Integration */}
-            <ConsultationPatientList initialPets={pets || []} />
+            <ConsultationPatientList initialPets={processedPets as any[]} />
         </div>
     );
 }

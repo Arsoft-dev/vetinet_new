@@ -1,0 +1,350 @@
+{
+  "node": {
+    "0081d8f07ec49582f6f4433c1d493cf992aec866c6": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "isSuperAdmin",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "rsc"
+      },
+      "exportedName": "isSuperAdmin",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "00c6b2f466af20d609e05afa93714f9b51be12ac2f": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "getGlobalMetrics",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "rsc"
+      },
+      "exportedName": "getGlobalMetrics",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "00cd11df0a6f68618681341a2979108e5aee240ea1": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "getAllClinics",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "rsc"
+      },
+      "exportedName": "getAllClinics",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "70febad55636402c97f5d95363e8db49971baa8a0a": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "updateClinicSubscription",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "rsc"
+      },
+      "exportedName": "updateClinicSubscription",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "600472047257049e2a5f5fd1b92aeda2d208ecc893": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "renewSubscription",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "rsc"
+      },
+      "exportedName": "renewSubscription",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "4091dc7db676074f3ce85452c0402a6dc88f427057": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "impersonateClinic",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "rsc"
+      },
+      "exportedName": "impersonateClinic",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "000136dcfa730710fa3785052e3c89a4e26193dc69": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "exitImpersonation",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "rsc"
+      },
+      "exportedName": "exitImpersonation",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "40269b71b8d56b3fd6778217b3907c6c510cbe5c1e": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "postAnnouncement",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "rsc"
+      },
+      "exportedName": "postAnnouncement",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "0078d76a2951a68246f2369b9c7e3e0218485e5cc9": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "getActiveAnnouncement",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "rsc"
+      },
+      "exportedName": "getActiveAnnouncement",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "004af4ee96a59c5b95a3daaca98b5a66dc07b9ea15": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "getNotifications",
+          "filename": "src/actions/notifications.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "action-browser"
+      },
+      "exportedName": "getNotifications",
+      "filename": "src/actions/notifications.ts"
+    },
+    "008f6689f87b57c973b4f45f7e22a657d5298032f2": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "getUnreadCount",
+          "filename": "src/actions/notifications.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "action-browser"
+      },
+      "exportedName": "getUnreadCount",
+      "filename": "src/actions/notifications.ts"
+    },
+    "40ed1e72a31e4c7ea62921f6a647edbc3d00d324c4": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "markAsRead",
+          "filename": "src/actions/notifications.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "action-browser"
+      },
+      "exportedName": "markAsRead",
+      "filename": "src/actions/notifications.ts"
+    },
+    "003f4cfa2e786dad64187d64e1e83c4b4d1e048085": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "markAllAsRead",
+          "filename": "src/actions/notifications.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "action-browser"
+      },
+      "exportedName": "markAllAsRead",
+      "filename": "src/actions/notifications.ts"
+    },
+    "0087aa665ccd138bf077574c8e96767903b18b52dc": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "default",
+          "filename": "src/app/dashboard/calendar/page.tsx"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "rsc"
+      },
+      "exportedName": "default",
+      "filename": "src/app/dashboard/calendar/page.tsx"
+    },
+    "40d59c34d4298fa58288ac517176872e059983bea9": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "createAppointment",
+          "filename": "src/actions/appointments.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "rsc"
+      },
+      "exportedName": "createAppointment",
+      "filename": "src/actions/appointments.ts"
+    },
+    "606962a1a85adc0719981dcf2dd42382983155bc0a": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "updateAppointment",
+          "filename": "src/actions/appointments.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "rsc"
+      },
+      "exportedName": "updateAppointment",
+      "filename": "src/actions/appointments.ts"
+    },
+    "4016ae052245e6d71f6811ae6c24d0dbc30ea8ccee": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "deleteAppointment",
+          "filename": "src/actions/appointments.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "rsc"
+      },
+      "exportedName": "deleteAppointment",
+      "filename": "src/actions/appointments.ts"
+    },
+    "009b9b3d87178d1362ccee77748f8b2d55cc1cf3fc": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "getAppointments",
+          "filename": "src/actions/appointments.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "rsc"
+      },
+      "exportedName": "getAppointments",
+      "filename": "src/actions/appointments.ts"
+    },
+    "402152aa14e47d7b87dc7072c886acd16d02288870": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "sendDischargeEmail",
+          "filename": "src/actions/emails.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "rsc"
+      },
+      "exportedName": "sendDischargeEmail",
+      "filename": "src/actions/emails.ts"
+    },
+    "4038169c1dd570833fea1a9e41b51efd456021cebd": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "sendAppointmentReminder",
+          "filename": "src/actions/emails.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "rsc"
+      },
+      "exportedName": "sendAppointmentReminder",
+      "filename": "src/actions/emails.ts"
+    },
+    "4056e58f7bc31d3e450e6158e3bae6dc9167fe5272": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "sendExamAlertEmail",
+          "filename": "src/actions/emails.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "rsc"
+      },
+      "exportedName": "sendExamAlertEmail",
+      "filename": "src/actions/emails.ts"
+    },
+    "4068745093c2b6cc1dbbd863f6fe8cf6502c1e09f9": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "sendWelcomeEmail",
+          "filename": "src/actions/emails.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "rsc"
+      },
+      "exportedName": "sendWelcomeEmail",
+      "filename": "src/actions/emails.ts"
+    },
+    "40d950e8fed53fb78cf47b9e3fd39dd60ec4960267": {
+      "workers": {
+        "app/dashboard/calendar/page": {
+          "moduleId": 51704,
+          "async": true,
+          "exportedName": "sendAppointmentEmail",
+          "filename": "src/actions/emails.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/calendar/page": "rsc"
+      },
+      "exportedName": "sendAppointmentEmail",
+      "filename": "src/actions/emails.ts"
+    }
+  },
+  "edge": {}
+}

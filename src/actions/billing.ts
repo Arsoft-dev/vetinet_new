@@ -48,7 +48,8 @@ export async function createInvoice({ clientId, items, totalUSD, exchangeRate, t
         igtfAmount: number
     },
     payments?: any[],
-    cashRegisterId?: string
+    cashRegisterId?: string,
+    medicalRecordId?: string
 }) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

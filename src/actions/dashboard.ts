@@ -183,7 +183,7 @@ export async function getDashboardStats() {
         if (!acc[method]) acc[method] = 0;
         
         // Calculate USD value for the chart normalization
-        const rate = Number(p.invoices?.exchange_rate) || 1;
+        const rate = Number((p.invoices as any)?.exchange_rate) || 1;
         const amountUsd = p.currency === 'VES' ? (Number(p.amount_paid_native) / rate) : Number(p.amount_paid_native);
         
         acc[method] += amountUsd;
@@ -194,7 +194,7 @@ export async function getDashboardStats() {
     
     // Recalculate monthly income based on payments for better accuracy
     const monthlyIncomeUSDFromPayments = (paymentsData || []).reduce((sum, p) => {
-        const rate = Number(p.invoices?.exchange_rate) || 1;
+        const rate = Number((p.invoices as any)?.exchange_rate) || 1;
         const amountUsd = p.currency === 'VES' ? (Number(p.amount_paid_native) / rate) : Number(p.amount_paid_native);
         return sum + amountUsd;
     }, 0);

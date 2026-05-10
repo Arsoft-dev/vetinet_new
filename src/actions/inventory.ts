@@ -233,7 +233,7 @@ export async function receiveStock(formData: FormData) {
         .from("inventory_batches")
         .insert({
             product_id: productId,
-            warehouse_id: warehouse.id,
+            warehouse_id: warehouse!.id,
             batch_number: batchNumber,
             expiry_date: expiryDate || null,
             quantity: quantity

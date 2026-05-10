@@ -1,0 +1,3 @@
+module.exports=[5050,(a,b,c)=>{"use strict";Object.defineProperty(c,"__esModule",{value:!0});var d={callServer:function(){return f.callServer},createServerReference:function(){return h.createServerReference},findSourceMapURL:function(){return g.findSourceMapURL}};for(var e in d)Object.defineProperty(c,e,{enumerable:!0,get:d[e]});let f=a.r(20611),g=a.r(1722),h=a.r(38783)},7210,a=>{"use strict";a.s([],1986),a.i(1986);var b=a.i(5050);let c=(0,b.createServerReference)("60385735bdb57d468ef30feb01e8cc55ef15564ed7",b.callServer,void 0,b.findSourceMapURL,"registerClinic");a.s(["registerClinic",()=>c],7210)}];
+
+//# sourceMappingURL=_84aff709._.js.map

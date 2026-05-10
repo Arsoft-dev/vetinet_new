@@ -1,0 +1,320 @@
+{
+  "node": {
+    "0081d8f07ec49582f6f4433c1d493cf992aec866c6": {
+      "workers": {
+        "app/dashboard/inventory/movements/page": {
+          "moduleId": 54513,
+          "async": false,
+          "exportedName": "isSuperAdmin",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/inventory/movements/page": "rsc"
+      },
+      "exportedName": "isSuperAdmin",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "00c6b2f466af20d609e05afa93714f9b51be12ac2f": {
+      "workers": {
+        "app/dashboard/inventory/movements/page": {
+          "moduleId": 54513,
+          "async": false,
+          "exportedName": "getGlobalMetrics",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/inventory/movements/page": "rsc"
+      },
+      "exportedName": "getGlobalMetrics",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "00cd11df0a6f68618681341a2979108e5aee240ea1": {
+      "workers": {
+        "app/dashboard/inventory/movements/page": {
+          "moduleId": 54513,
+          "async": false,
+          "exportedName": "getAllClinics",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/inventory/movements/page": "rsc"
+      },
+      "exportedName": "getAllClinics",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "70febad55636402c97f5d95363e8db49971baa8a0a": {
+      "workers": {
+        "app/dashboard/inventory/movements/page": {
+          "moduleId": 54513,
+          "async": false,
+          "exportedName": "updateClinicSubscription",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/inventory/movements/page": "rsc"
+      },
+      "exportedName": "updateClinicSubscription",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "600472047257049e2a5f5fd1b92aeda2d208ecc893": {
+      "workers": {
+        "app/dashboard/inventory/movements/page": {
+          "moduleId": 54513,
+          "async": false,
+          "exportedName": "renewSubscription",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/inventory/movements/page": "rsc"
+      },
+      "exportedName": "renewSubscription",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "4091dc7db676074f3ce85452c0402a6dc88f427057": {
+      "workers": {
+        "app/dashboard/inventory/movements/page": {
+          "moduleId": 54513,
+          "async": false,
+          "exportedName": "impersonateClinic",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/inventory/movements/page": "rsc"
+      },
+      "exportedName": "impersonateClinic",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "000136dcfa730710fa3785052e3c89a4e26193dc69": {
+      "workers": {
+        "app/dashboard/inventory/movements/page": {
+          "moduleId": 54513,
+          "async": false,
+          "exportedName": "exitImpersonation",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/inventory/movements/page": "rsc"
+      },
+      "exportedName": "exitImpersonation",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "40269b71b8d56b3fd6778217b3907c6c510cbe5c1e": {
+      "workers": {
+        "app/dashboard/inventory/movements/page": {
+          "moduleId": 54513,
+          "async": false,
+          "exportedName": "postAnnouncement",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/inventory/movements/page": "rsc"
+      },
+      "exportedName": "postAnnouncement",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "0078d76a2951a68246f2369b9c7e3e0218485e5cc9": {
+      "workers": {
+        "app/dashboard/inventory/movements/page": {
+          "moduleId": 54513,
+          "async": false,
+          "exportedName": "getActiveAnnouncement",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/inventory/movements/page": "rsc"
+      },
+      "exportedName": "getActiveAnnouncement",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "004af4ee96a59c5b95a3daaca98b5a66dc07b9ea15": {
+      "workers": {
+        "app/dashboard/inventory/movements/page": {
+          "moduleId": 54513,
+          "async": false,
+          "exportedName": "getNotifications",
+          "filename": "src/actions/notifications.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/inventory/movements/page": "action-browser"
+      },
+      "exportedName": "getNotifications",
+      "filename": "src/actions/notifications.ts"
+    },
+    "008f6689f87b57c973b4f45f7e22a657d5298032f2": {
+      "workers": {
+        "app/dashboard/inventory/movements/page": {
+          "moduleId": 54513,
+          "async": false,
+          "exportedName": "getUnreadCount",
+          "filename": "src/actions/notifications.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/inventory/movements/page": "action-browser"
+      },
+      "exportedName": "getUnreadCount",
+      "filename": "src/actions/notifications.ts"
+    },
+    "40ed1e72a31e4c7ea62921f6a647edbc3d00d324c4": {
+      "workers": {
+        "app/dashboard/inventory/movements/page": {
+          "moduleId": 54513,
+          "async": false,
+          "exportedName": "markAsRead",
+          "filename": "src/actions/notifications.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/inventory/movements/page": "action-browser"
+      },
+      "exportedName": "markAsRead",
+      "filename": "src/actions/notifications.ts"
+    },
+    "003f4cfa2e786dad64187d64e1e83c4b4d1e048085": {
+      "workers": {
+        "app/dashboard/inventory/movements/page": {
+          "moduleId": 54513,
+          "async": false,
+          "exportedName": "markAllAsRead",
+          "filename": "src/actions/notifications.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/inventory/movements/page": "action-browser"
+      },
+      "exportedName": "markAllAsRead",
+      "filename": "src/actions/notifications.ts"
+    },
+    "00c3821cf6c72ef0fe1019b6bc322052f961c775e7": {
+      "workers": {
+        "app/dashboard/inventory/movements/page": {
+          "moduleId": 54513,
+          "async": false,
+          "exportedName": "getInventoryStats",
+          "filename": "src/actions/inventory.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/inventory/movements/page": "rsc"
+      },
+      "exportedName": "getInventoryStats",
+      "filename": "src/actions/inventory.ts"
+    },
+    "400fa3353261c602cc24fcf960fb5d2f260d685362": {
+      "workers": {
+        "app/dashboard/inventory/movements/page": {
+          "moduleId": 54513,
+          "async": false,
+          "exportedName": "updateProduct",
+          "filename": "src/actions/inventory.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/inventory/movements/page": "rsc"
+      },
+      "exportedName": "updateProduct",
+      "filename": "src/actions/inventory.ts"
+    },
+    "4044a4191126a326c44dfa93e716e314933161b493": {
+      "workers": {
+        "app/dashboard/inventory/movements/page": {
+          "moduleId": 54513,
+          "async": false,
+          "exportedName": "deleteProduct",
+          "filename": "src/actions/inventory.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/inventory/movements/page": "rsc"
+      },
+      "exportedName": "deleteProduct",
+      "filename": "src/actions/inventory.ts"
+    },
+    "40513ed0bca2887408c42a551099244a8734a957e3": {
+      "workers": {
+        "app/dashboard/inventory/movements/page": {
+          "moduleId": 54513,
+          "async": false,
+          "exportedName": "getProducts",
+          "filename": "src/actions/inventory.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/inventory/movements/page": "rsc"
+      },
+      "exportedName": "getProducts",
+      "filename": "src/actions/inventory.ts"
+    },
+    "406e9c23cd31fd0a40697cf2a3f05df561713dfb26": {
+      "workers": {
+        "app/dashboard/inventory/movements/page": {
+          "moduleId": 54513,
+          "async": false,
+          "exportedName": "createProduct",
+          "filename": "src/actions/inventory.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/inventory/movements/page": "rsc"
+      },
+      "exportedName": "createProduct",
+      "filename": "src/actions/inventory.ts"
+    },
+    "40cfe9154ceb219f6b273a263470adb034b870812d": {
+      "workers": {
+        "app/dashboard/inventory/movements/page": {
+          "moduleId": 54513,
+          "async": false,
+          "exportedName": "consumeProduct",
+          "filename": "src/actions/inventory.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/inventory/movements/page": "rsc"
+      },
+      "exportedName": "consumeProduct",
+      "filename": "src/actions/inventory.ts"
+    },
+    "40f9ae0c20e1a431f050688475315a3012599dfab3": {
+      "workers": {
+        "app/dashboard/inventory/movements/page": {
+          "moduleId": 54513,
+          "async": false,
+          "exportedName": "receiveStock",
+          "filename": "src/actions/inventory.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/inventory/movements/page": "rsc"
+      },
+      "exportedName": "receiveStock",
+      "filename": "src/actions/inventory.ts"
+    },
+    "6094798ef7f1943b94265776e7d52d671212c2c126": {
+      "workers": {
+        "app/dashboard/inventory/movements/page": {
+          "moduleId": 54513,
+          "async": false,
+          "exportedName": "getInventoryMovements",
+          "filename": "src/actions/inventory.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/inventory/movements/page": "rsc"
+      },
+      "exportedName": "getInventoryMovements",
+      "filename": "src/actions/inventory.ts"
+    }
+  },
+  "edge": {}
+}

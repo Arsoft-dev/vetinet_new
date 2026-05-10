@@ -124,16 +124,14 @@ export async function dischargePet(hospitalizationId: string, totalCost: number)
 
     // Enviar correo de alta
     // @ts-ignore
-    if (hospData?.pet?.clients?.email) {
+    if ((hospData as any)?.pet?.clients?.email) {
         (async () => {
             const { sendDischargeEmail } = await import("@/actions/emails");
             await sendDischargeEmail({
-                // @ts-ignore
-                email: hospData.pet.clients.email,
-                // @ts-ignore
-                ownerName: hospData.pet.clients.full_name,
-                petName: hospData.pet.name,
-                clinicName: hospData.clinics?.name || "Vetinet",
+                email: (hospData as any).pet.clients.email,
+                ownerName: (hospData as any).pet.clients.full_name,
+                petName: (hospData as any).pet.name,
+                clinicName: (hospData as any).clinics?.name || "Vetinet",
                 dischargeNotes: "Su mascota ha completado su tratamiento y está lista para volver a casa. Siga las instrucciones del veterinario para asegurar una recuperación total."
             });
         })().catch(console.error);

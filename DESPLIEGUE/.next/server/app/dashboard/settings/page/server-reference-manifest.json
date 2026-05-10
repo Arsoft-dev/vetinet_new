@@ -1,0 +1,395 @@
+{
+  "node": {
+    "0081d8f07ec49582f6f4433c1d493cf992aec866c6": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "isSuperAdmin",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "rsc"
+      },
+      "exportedName": "isSuperAdmin",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "00c6b2f466af20d609e05afa93714f9b51be12ac2f": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "getGlobalMetrics",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "rsc"
+      },
+      "exportedName": "getGlobalMetrics",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "00cd11df0a6f68618681341a2979108e5aee240ea1": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "getAllClinics",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "rsc"
+      },
+      "exportedName": "getAllClinics",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "70febad55636402c97f5d95363e8db49971baa8a0a": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "updateClinicSubscription",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "rsc"
+      },
+      "exportedName": "updateClinicSubscription",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "600472047257049e2a5f5fd1b92aeda2d208ecc893": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "renewSubscription",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "rsc"
+      },
+      "exportedName": "renewSubscription",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "4091dc7db676074f3ce85452c0402a6dc88f427057": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "impersonateClinic",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "rsc"
+      },
+      "exportedName": "impersonateClinic",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "000136dcfa730710fa3785052e3c89a4e26193dc69": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "exitImpersonation",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "rsc"
+      },
+      "exportedName": "exitImpersonation",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "40269b71b8d56b3fd6778217b3907c6c510cbe5c1e": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "postAnnouncement",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "rsc"
+      },
+      "exportedName": "postAnnouncement",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "0078d76a2951a68246f2369b9c7e3e0218485e5cc9": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "getActiveAnnouncement",
+          "filename": "src/actions/superadmin.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "rsc"
+      },
+      "exportedName": "getActiveAnnouncement",
+      "filename": "src/actions/superadmin.ts"
+    },
+    "004af4ee96a59c5b95a3daaca98b5a66dc07b9ea15": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "getNotifications",
+          "filename": "src/actions/notifications.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "action-browser"
+      },
+      "exportedName": "getNotifications",
+      "filename": "src/actions/notifications.ts"
+    },
+    "008f6689f87b57c973b4f45f7e22a657d5298032f2": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "getUnreadCount",
+          "filename": "src/actions/notifications.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "action-browser"
+      },
+      "exportedName": "getUnreadCount",
+      "filename": "src/actions/notifications.ts"
+    },
+    "40ed1e72a31e4c7ea62921f6a647edbc3d00d324c4": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "markAsRead",
+          "filename": "src/actions/notifications.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "action-browser"
+      },
+      "exportedName": "markAsRead",
+      "filename": "src/actions/notifications.ts"
+    },
+    "003f4cfa2e786dad64187d64e1e83c4b4d1e048085": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "markAllAsRead",
+          "filename": "src/actions/notifications.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "action-browser"
+      },
+      "exportedName": "markAllAsRead",
+      "filename": "src/actions/notifications.ts"
+    },
+    "00ca2cd6630a4915a52953b214ac77e14b23231278": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "getClinicData",
+          "filename": "src/actions/clinic-actions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "action-browser"
+      },
+      "exportedName": "getClinicData",
+      "filename": "src/actions/clinic-actions.ts"
+    },
+    "40c76fea5d91cf69141f50feef9448aed954acbf8d": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "updateClinicData",
+          "filename": "src/actions/clinic-actions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "action-browser"
+      },
+      "exportedName": "updateClinicData",
+      "filename": "src/actions/clinic-actions.ts"
+    },
+    "00674b70ab6af791a571f687e48dcea0e6baadb973": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "getClinicMembers",
+          "filename": "src/actions/clinic-actions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "action-browser"
+      },
+      "exportedName": "getClinicMembers",
+      "filename": "src/actions/clinic-actions.ts"
+    },
+    "405e83ca0e05443fcbaa65ca2e96dbbd56b4a27895": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "updateClinicLogo",
+          "filename": "src/actions/clinic-actions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "action-browser"
+      },
+      "exportedName": "updateClinicLogo",
+      "filename": "src/actions/clinic-actions.ts"
+    },
+    "40bb878a66bff3d1d08846dc95bac808b2170dbd14": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "addClinicMember",
+          "filename": "src/actions/clinic-actions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "action-browser"
+      },
+      "exportedName": "addClinicMember",
+      "filename": "src/actions/clinic-actions.ts"
+    },
+    "60a12f9967940f07c492a3e13418377e06254998a9": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "updateClinicMember",
+          "filename": "src/actions/clinic-actions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "action-browser"
+      },
+      "exportedName": "updateClinicMember",
+      "filename": "src/actions/clinic-actions.ts"
+    },
+    "6037d9ce536042c657458a1612705a132abb4f22d7": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "forceResetMemberPassword",
+          "filename": "src/actions/clinic-actions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "action-browser"
+      },
+      "exportedName": "forceResetMemberPassword",
+      "filename": "src/actions/clinic-actions.ts"
+    },
+    "40ef2b047c460754244b2db2b9dd66488179d9298e": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "updateCommunicationSettings",
+          "filename": "src/actions/clinic-actions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "action-browser"
+      },
+      "exportedName": "updateCommunicationSettings",
+      "filename": "src/actions/clinic-actions.ts"
+    },
+    "40c0fb7290149036e74c91fabc11627b1e179a1821": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "updateExchangeRateSettings",
+          "filename": "src/actions/clinic-settings.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "action-browser"
+      },
+      "exportedName": "updateExchangeRateSettings",
+      "filename": "src/actions/clinic-settings.ts"
+    },
+    "400b4feb36631414e8080ce19369939a3258d3706e": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "updateClinicSettings",
+          "filename": "src/actions/clinic-settings.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "action-browser"
+      },
+      "exportedName": "updateClinicSettings",
+      "filename": "src/actions/clinic-settings.ts"
+    },
+    "40ac56f816df1b2cf03e514cdf3c741e7b98e4e759": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "updateOwnPassword",
+          "filename": "src/actions/auth-actions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "action-browser"
+      },
+      "exportedName": "updateOwnPassword",
+      "filename": "src/actions/auth-actions.ts"
+    },
+    "40623df08a4cfef6621cbc8f6f10ce4a08bea6ee0a": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "updateProfile",
+          "filename": "src/actions/profile-actions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "action-browser"
+      },
+      "exportedName": "updateProfile",
+      "filename": "src/actions/profile-actions.ts"
+    },
+    "403cd43a963c44569a92ceea965cf0adbc831199d8": {
+      "workers": {
+        "app/dashboard/settings/page": {
+          "moduleId": 89728,
+          "async": false,
+          "exportedName": "updateAvatar",
+          "filename": "src/actions/profile-actions.ts"
+        }
+      },
+      "layer": {
+        "app/dashboard/settings/page": "action-browser"
+      },
+      "exportedName": "updateAvatar",
+      "filename": "src/actions/profile-actions.ts"
+    }
+  },
+  "edge": {}
+}

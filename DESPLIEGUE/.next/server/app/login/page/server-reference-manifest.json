@@ -1,0 +1,20 @@
+{
+  "node": {
+    "60385735bdb57d468ef30feb01e8cc55ef15564ed7": {
+      "workers": {
+        "app/login/page": {
+          "moduleId": 27411,
+          "async": false,
+          "exportedName": "registerClinic",
+          "filename": "src/actions/register-clinic.ts"
+        }
+      },
+      "layer": {
+        "app/login/page": "action-browser"
+      },
+      "exportedName": "registerClinic",
+      "filename": "src/actions/register-clinic.ts"
+    }
+  },
+  "edge": {}
+}

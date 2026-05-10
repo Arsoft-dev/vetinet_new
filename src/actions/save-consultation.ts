@@ -39,6 +39,7 @@ export async function saveConsultation(
         objective: formData.get("objective") as string,
         assessment: formData.get("assessment") as string,
         plan: formData.get("plan") as string,
+        reason: formData.get("reason") as string,
         inventoryItems: formData.get("inventoryItems") as string,
 
         // Basic Vitals
