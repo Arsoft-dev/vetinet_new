@@ -14,33 +14,36 @@ import { motion, AnimatePresence } from "framer-motion";
 // but let's assume standard useActionState/useFormState availability.
 import { useFormStatus } from "react-dom";
 
-function SubmitButtons() {
+function SubmitButtons({ billingEnabled }: { billingEnabled: boolean }) {
     const { pending } = useFormStatus();
     return (
         <div className="flex flex-col sm:flex-row gap-3">
             <button
                 type="submit"
                 disabled={pending}
-                className="flex items-center justify-center gap-2 px-6 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold shadow-sm hover:bg-slate-200 transition-all disabled:opacity-50 border border-slate-200"
+                className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold transition-all disabled:opacity-50 border ${!billingEnabled ? 'bg-primary text-white shadow-lg shadow-primary/20 hover:bg-primary/90 border-transparent w-full sm:w-auto' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200'}`}
             >
                 <Save size={20} />
                 {pending ? "Guardando..." : "Guardar Historial"}
             </button>
-            <button
-                type="submit"
-                name="sendToBilling"
-                value="true"
-                disabled={pending}
-                className="flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-xl font-bold shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all disabled:opacity-50"
-            >
-                <FileText size={20} />
-                {pending ? "Enviando..." : "Finalizar y Cobrar"}
-            </button>
+            
+            {billingEnabled && (
+                <button
+                    type="submit"
+                    name="sendToBilling"
+                    value="true"
+                    disabled={pending}
+                    className="flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-xl font-bold shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all disabled:opacity-50"
+                >
+                    <FileText size={20} />
+                    {pending ? "Enviando..." : "Finalizar y Cobrar"}
+                </button>
+            )}
         </div>
     );
 }
 
-export function ConsultationForm({ petId, petName }: { petId: string, petName: string }) {
+export function ConsultationForm({ petId, petName, billingEnabled = true }: { petId: string, petName: string, billingEnabled?: boolean }) {
     // Bind the petId to the server action
     const saveWithId = saveConsultation.bind(null, petId);
 
@@ -339,7 +342,7 @@ export function ConsultationForm({ petId, petName }: { petId: string, petName: s
                         Cancelar
                     </button>
                 </Link>
-                <SubmitButtons />
+                <SubmitButtons billingEnabled={billingEnabled} />
             </div>
 
         </form >

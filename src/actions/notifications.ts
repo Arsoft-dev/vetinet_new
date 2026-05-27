@@ -54,3 +54,13 @@ export async function markAllAsRead() {
     
     revalidatePath("/");
 }
+
+export async function deleteNotification(id: string) {
+    const supabase = await createClient();
+    await supabase
+        .from("notifications")
+        .delete()
+        .eq("id", id);
+    
+    revalidatePath("/");
+}

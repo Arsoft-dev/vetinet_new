@@ -17,7 +17,7 @@ import { motion } from "framer-motion";
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'];
 
-export default function DashboardClient({ data }: { data: any }) {
+export default function DashboardClient({ data, billingEnabled }: { data: any, billingEnabled: boolean }) {
     const [isMounted, setIsMounted] = React.useState(false);
 
     React.useEffect(() => {
@@ -28,14 +28,14 @@ export default function DashboardClient({ data }: { data: any }) {
         { label: "Pacientes Hoy", value: data.stats.patientsToday.toString(), icon: Users, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20", trend: null },
         { label: "Citas Pendientes", value: data.stats.pendingAppointments.toString(), icon: Calendar, color: "text-purple-600 dark:text-purple-400", bg: "bg-purple-50 dark:bg-purple-900/20", trend: null },
         { label: "Total Pacientes", value: data.stats.totalPatients.toString(), icon: Users, color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-900/20", trend: null },
-        { 
+        ...(billingEnabled ? [{ 
             label: "Ingresos del Mes", 
             value: `$${data.stats.monthlyIncome.toLocaleString('es-VE')}`, 
             icon: DollarSign, 
             color: "text-emerald-600 dark:text-emerald-400", 
             bg: "bg-emerald-50 dark:bg-emerald-900/20",
             trend: data.stats.incomeGrowth 
-        },
+        }] : []),
     ];
 
     return (
@@ -160,105 +160,107 @@ export default function DashboardClient({ data }: { data: any }) {
                         </div>
                     </motion.div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {/* Payment Methods Distribution */}
-                        <motion.div 
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 p-8 shadow-sm flex flex-col"
-                        >
-                            <h3 className="text-lg font-black text-slate-800 dark:text-white mb-6 tracking-tight flex items-center gap-2">
-                                <PieChartIcon className="text-emerald-500" size={20} /> Distribución de Ingresos
-                            </h3>
-                            <div className="h-[250px] w-full relative min-h-0">
-                                {data.paymentDistribution.length > 0 && isMounted ? (
-                                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                                        <PieChart>
-                                            <Pie
-                                                data={data.paymentDistribution}
-                                                cx="50%"
-                                                cy="50%"
-                                                innerRadius={70}
-                                                outerRadius={95}
-                                                paddingAngle={8}
-                                                dataKey="value"
-                                                animationDuration={1500}
-                                                stroke="none"
-                                            >
-                                                {data.paymentDistribution.map((entry: any, index: number) => (
-                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                                ))}
-                                            </Pie>
-                                            <Tooltip 
-                                                formatter={(value: any) => [`$${value.toLocaleString()}`, 'Total USD']}
-                                                contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '16px', color: '#fff' }}
-                                            />
-                                        </PieChart>
-                                    </ResponsiveContainer>
-                                ) : (
-                                    <div className="h-full flex flex-col items-center justify-center text-slate-400 opacity-50">
-                                        <PieChartIcon size={48} className="mb-2" />
-                                        <p className="text-[10px] font-black uppercase tracking-widest">Sin pagos registrados</p>
-                                    </div>
-                                )}
-                                {data.paymentDistribution.length > 0 && (
-                                    <div className="absolute inset-0 flex items-center justify-center flex-col pointer-events-none">
-                                        <span className="text-2xl font-black text-slate-800 dark:text-white tracking-tighter">${data.stats.monthlyIncome.toFixed(0)}</span>
-                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">USD TOTAL</span>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="grid grid-cols-2 gap-3 mt-6">
-                                {data.paymentDistribution.map((p: any, i: number) => (
-                                    <div key={i} className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full" style={{backgroundColor: COLORS[i % COLORS.length]}} />
-                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-tight">{p.name}</span>
+                    {billingEnabled && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            {/* Payment Methods Distribution */}
+                            <motion.div 
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 p-8 shadow-sm flex flex-col"
+                            >
+                                <h3 className="text-lg font-black text-slate-800 dark:text-white mb-6 tracking-tight flex items-center gap-2">
+                                    <PieChartIcon className="text-emerald-500" size={20} /> Distribución de Ingresos
+                                </h3>
+                                <div className="h-[250px] w-full relative min-h-0">
+                                    {data.paymentDistribution.length > 0 && isMounted ? (
+                                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                                            <PieChart>
+                                                <Pie
+                                                    data={data.paymentDistribution}
+                                                    cx="50%"
+                                                    cy="50%"
+                                                    innerRadius={70}
+                                                    outerRadius={95}
+                                                    paddingAngle={8}
+                                                    dataKey="value"
+                                                    animationDuration={1500}
+                                                    stroke="none"
+                                                >
+                                                    {data.paymentDistribution.map((entry: any, index: number) => (
+                                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                    ))}
+                                                </Pie>
+                                                <Tooltip 
+                                                    formatter={(value: any) => [`$${value.toLocaleString()}`, 'Total USD']}
+                                                    contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '16px', color: '#fff' }}
+                                                />
+                                            </PieChart>
+                                        </ResponsiveContainer>
+                                    ) : (
+                                        <div className="h-full flex flex-col items-center justify-center text-slate-400 opacity-50">
+                                            <PieChartIcon size={48} className="mb-2" />
+                                            <p className="text-[10px] font-black uppercase tracking-widest">Sin pagos registrados</p>
                                         </div>
-                                        <span className="text-[10px] font-black text-slate-700 dark:text-slate-300">${p.value.toLocaleString()}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </motion.div>
+                                    )}
+                                    {data.paymentDistribution.length > 0 && (
+                                        <div className="absolute inset-0 flex items-center justify-center flex-col pointer-events-none">
+                                            <span className="text-2xl font-black text-slate-800 dark:text-white tracking-tighter">${data.stats.monthlyIncome.toFixed(0)}</span>
+                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">USD TOTAL</span>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="grid grid-cols-2 gap-3 mt-6">
+                                    {data.paymentDistribution.map((p: any, i: number) => (
+                                        <div key={i} className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-2 h-2 rounded-full" style={{backgroundColor: COLORS[i % COLORS.length]}} />
+                                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-tight">{p.name}</span>
+                                            </div>
+                                            <span className="text-[10px] font-black text-slate-700 dark:text-slate-300">${p.value.toLocaleString()}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </motion.div>
 
-                        {/* Top Products/Services Ranking */}
-                        <motion.div 
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 p-8 shadow-sm"
-                        >
-                            <h3 className="text-lg font-black text-slate-800 dark:text-white mb-6 tracking-tight flex items-center gap-2">
-                                <TrendingUp className="text-amber-500" size={20} /> Top Items (Ventas USD)
-                            </h3>
-                            <div className="space-y-5">
-                                {data.topItems.map((item: any, i: number) => (
-                                    <div key={i} className="group cursor-default">
-                                        <div className="flex justify-between text-[10px] font-black uppercase tracking-wider mb-2">
-                                            <span className="text-slate-500 group-hover:text-amber-500 transition-colors truncate max-w-[150px]">{item.name}</span>
-                                            <div className="flex items-center gap-1">
-                                                <span className="text-slate-900 dark:text-white">${item.value.toLocaleString()}</span>
-                                                <span className="text-slate-400 opacity-50">USD</span>
+                            {/* Top Products/Services Ranking */}
+                            <motion.div 
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 p-8 shadow-sm"
+                            >
+                                <h3 className="text-lg font-black text-slate-800 dark:text-white mb-6 tracking-tight flex items-center gap-2">
+                                    <TrendingUp className="text-amber-500" size={20} /> Top Items (Ventas USD)
+                                </h3>
+                                <div className="space-y-5">
+                                    {data.topItems.map((item: any, i: number) => (
+                                        <div key={i} className="group cursor-default">
+                                            <div className="flex justify-between text-[10px] font-black uppercase tracking-wider mb-2">
+                                                <span className="text-slate-500 group-hover:text-amber-500 transition-colors truncate max-w-[150px]">{item.name}</span>
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-slate-900 dark:text-white">${item.value.toLocaleString()}</span>
+                                                    <span className="text-slate-400 opacity-50">USD</span>
+                                                </div>
+                                            </div>
+                                            <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-200/50 dark:border-slate-700/50">
+                                                <motion.div 
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${(item.value / (data.topItems[0]?.value || 1)) * 100}%` }}
+                                                    transition={{ duration: 1.5, ease: "circOut", delay: i * 0.1 }}
+                                                    className="h-full bg-gradient-to-r from-amber-400 to-amber-600 rounded-full shadow-[0_0_10px_rgba(245,158,11,0.2)]" 
+                                                />
                                             </div>
                                         </div>
-                                        <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-200/50 dark:border-slate-700/50">
-                                            <motion.div 
-                                                initial={{ width: 0 }}
-                                                animate={{ width: `${(item.value / (data.topItems[0]?.value || 1)) * 100}%` }}
-                                                transition={{ duration: 1.5, ease: "circOut", delay: i * 0.1 }}
-                                                className="h-full bg-gradient-to-r from-amber-400 to-amber-600 rounded-full shadow-[0_0_10px_rgba(245,158,11,0.2)]" 
-                                            />
+                                    ))}
+                                    {data.topItems.length === 0 && (
+                                        <div className="h-full flex flex-col items-center justify-center text-slate-400 opacity-50 py-12">
+                                            <Package size={48} className="mb-2" />
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-center">Aún no hay ventas detalladas este mes</p>
                                         </div>
-                                    </div>
-                                ))}
-                                {data.topItems.length === 0 && (
-                                    <div className="h-full flex flex-col items-center justify-center text-slate-400 opacity-50 py-12">
-                                        <Package size={48} className="mb-2" />
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-center">Aún no hay ventas detalladas este mes</p>
-                                    </div>
-                                )}
-                            </div>
-                        </motion.div>
-                    </div>
+                                    )}
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Right Area: Agenda & Alerts */}

@@ -1,28 +1,41 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { revalidatePath } from "next/cache";
 
-export async function getInventoryStats() {
+export async function getInventoryStats(warehouseId?: string) {
     const supabase = await createClient();
 
+    // 1. Get user's clinic config
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { totalProducts: 0, lowStock: 0, totalValue: 0 };
+    
+    const { data: member } = await supabase
+        .from("clinic_members")
+        .select("clinic_id, clinics(billing_enabled)")
+        .eq("user_id", user.id)
+        .single();
+    
+    if (!member) return { totalProducts: 0, lowStock: 0, totalValue: 0 };
+    const billingEnabled = (member.clinics as any)?.billing_enabled ?? true;
+
     // Get total products count
-    const { count: totalProducts, error: prodError } = await supabase
+    const { count: totalProducts } = await supabase
         .from("products")
         .select("*", { count: 'exact', head: true })
+        .eq("clinic_id", member.clinic_id)
         .eq("is_archived", false);
-
-    // Get low stock count (products where total quantity < min_stock_level)
-    // This requires a more complex query or computing in code. 
-    // For MVP efficiency, we'll fetch products and compute simple stats or use a view later.
-    // Let's try to do it in one query if possible, or fetch all products (assuming < 1000 for now)
 
     const { data: products, error: dataError } = await supabase
         .from("products")
         .select(`
             id,
-            min_stock_level,
-            sale_price
+            category,
+            min_stock_level
+            ${billingEnabled ? ', sale_price' : ''}
         `)
+        .eq("clinic_id", member.clinic_id)
         .eq("is_archived", false);
 
     if (dataError) {
@@ -34,9 +47,15 @@ export async function getInventoryStats() {
     // we need to sum up batches for each product. 
     // This might be heavy. Let's create a SQL function or just fetch batches too.
 
-    const { data: batches } = await supabase
+    let batchesQuery = supabase
         .from("inventory_batches")
-        .select("product_id, quantity, expiry_date");
+        .select("product_id, quantity, expiry_date, warehouse_id");
+
+    if (warehouseId) {
+        batchesQuery = batchesQuery.eq("warehouse_id", warehouseId);
+    }
+
+    const { data: batches } = await batchesQuery;
 
     if (!batches) return { totalProducts: totalProducts || 0, lowStock: 0, totalValue: 0 };
 
@@ -51,11 +70,16 @@ export async function getInventoryStats() {
     });
 
     products.forEach(p => {
+        const isService = (p as any).category === 'Service' || (p as any).category === 'Other';
         const stock = stockMap.get(p.id) || 0;
-        if (stock <= (p.min_stock_level || 5)) {
+        
+        if (!isService && stock <= (p.min_stock_level || 5)) {
             lowStockCount++;
         }
-        totalValue += (Number(p.sale_price) * stock);
+        
+        if (billingEnabled) {
+            totalValue += (Number((p as any).sale_price) * stock);
+        }
     });
 
     return {
@@ -65,19 +89,31 @@ export async function getInventoryStats() {
     };
 }
 
-export async function getProducts(query: string = "") {
+export async function getProducts(query: string = "", warehouseId?: string) {
     const supabase = await createClient();
+
+    // 1. Get billing config
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: member } = await supabase
+        .from("clinic_members")
+        .select("clinic_id, clinics(billing_enabled)")
+        .eq("user_id", user?.id)
+        .single();
+    const billingEnabled = (member?.clinics as any)?.billing_enabled ?? true;
 
     // Fetch Products with their Batches to calculate total stock
     let dbQuery = supabase
         .from("products")
         .select(`
-            *,
+            id, name, category, unit, min_stock_level, is_archived, created_at, barcode
+            ${billingEnabled ? ', sale_price' : ''},
             batches:inventory_batches(
                 quantity,
-                expiry_date
+                expiry_date,
+                warehouse_id
             )
         `)
+        .eq("clinic_id", member.clinic_id)
         .eq("is_archived", false)
         .order("name");
 
@@ -88,35 +124,43 @@ export async function getProducts(query: string = "") {
     const { data, error } = await dbQuery;
 
     if (error) {
-        console.error("Error fetching products:", error);
+        console.error("Error fetching products:", error.message || error);
         return [];
     }
 
     // Process data to add 'totalStock' field
     const processed = data.map(product => {
-        const totalStock = product.batches?.reduce((acc: number, b: any) => acc + Number(b.quantity), 0) || 0;
+        // Filtrar lotes por almacén si se proporciona warehouseId
+        const filteredBatches = warehouseId
+            ? product.batches?.filter((b: any) => b.warehouse_id === warehouseId) || []
+            : product.batches || [];
+
+        const isService = product.category === 'Service' || product.category === 'Other';
+        const totalStock = isService ? null : (filteredBatches.reduce((acc: number, b: any) => acc + Number(b.quantity), 0) || 0);
         
         let hasExpiring = false;
         let isExpired = false;
         let closestExpiry = null;
 
-        const validBatches = product.batches?.filter((b: any) => Number(b.quantity) > 0 && b.expiry_date) || [];
+        if (!isService) {
+            const validBatches = filteredBatches.filter((b: any) => Number(b.quantity) > 0 && b.expiry_date) || [];
 
-        if (validBatches.length > 0) {
-            const earliestBatch = validBatches.reduce((min: any, b: any) => {
-                return new Date(b.expiry_date) < new Date(min.expiry_date) ? b : min;
-            });
+            if (validBatches.length > 0) {
+                const earliestBatch = validBatches.reduce((min: any, b: any) => {
+                    return new Date(b.expiry_date) < new Date(min.expiry_date) ? b : min;
+                });
 
-            closestExpiry = earliestBatch.expiry_date;
-            
-            const date = new Date(closestExpiry);
-            const now = new Date();
-            const daysDiff = (date.getTime() - now.getTime()) / (1000 * 3600 * 24);
+                closestExpiry = earliestBatch.expiry_date;
+                
+                const date = new Date(closestExpiry);
+                const now = new Date();
+                const daysDiff = (date.getTime() - now.getTime()) / (1000 * 3600 * 24);
 
-            if (daysDiff < 0) {
-                isExpired = true;
-            } else if (daysDiff <= 15) {
-                hasExpiring = true;
+                if (daysDiff < 0) {
+                    isExpired = true;
+                } else if (daysDiff <= 15) {
+                    hasExpiring = true;
+                }
             }
         }
 
@@ -153,6 +197,7 @@ export async function createProduct(formData: FormData) {
         min_stock_level: parseInt(formData.get("minStock") as string) || 5,
         sale_price: parseFloat(formData.get("price") as string) || 0,
         unit: formData.get("unit") as string || 'unit',
+        barcode: formData.get("barcode") as string || null,
         clinic_id: member.clinic_id
     };
 
@@ -275,7 +320,8 @@ export async function updateProduct(formData: FormData) {
         category: formData.get("category") as string,
         min_stock_level: parseInt(formData.get("minStock") as string) || 5,
         sale_price: parseFloat(formData.get("price") as string) || 0,
-        unit: formData.get("unit") as string || 'unit'
+        unit: formData.get("unit") as string || 'unit',
+        barcode: formData.get("barcode") as string || null
     };
 
     const { error } = await supabase
@@ -385,26 +431,44 @@ export async function consumeProduct(formData: FormData) {
     return { success: true, message: "Producto descontado y agregado" };
 }
 
-export async function getInventoryMovements(limit = 1000, productId?: string) {
+export async function getInventoryMovements(limit = 1000, productId?: string, warehouseId?: string) {
     const supabase = await createClient();
 
+    // Check tenant
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data: member } = await supabase
+        .from("clinic_members")
+        .select("clinic_id")
+        .eq("user_id", user.id)
+        .single();
+    if (!member) return [];
+
     let query = supabase
-        .from("inventory_transactions")
+        .from("view_inventory_kardex")
         .select(`
             id,
             transaction_type,
-            quantity,
+            quantity_change,
             stock_before,
             stock_after,
-            notes,
+            reason,
             created_at,
-            product:products(name, category, unit)
+            product_name,
+            responsible_user,
+            warehouse_name
         `)
+        .eq("clinic_id", member.clinic_id)
         .order("created_at", { ascending: false })
         .limit(limit);
 
     if (productId) {
         query = query.eq('product_id', productId);
+    }
+
+    if (warehouseId) {
+        query = query.eq('warehouse_id', warehouseId);
     }
 
     const { data: movements, error } = await query;
@@ -429,8 +493,184 @@ export async function getInventoryMovements(limit = 1000, productId?: string) {
             ...m,
             type: typeInfo.label,
             typeColor: typeInfo.color,
-            quantity_change: m.quantity,
-            reason: m.notes
+            quantity_change: m.quantity_change,
+            reason: m.reason
         };
     });
+}
+
+export async function deductStockFEFO(
+    supabaseAdmin: any,
+    clinicId: string,
+    productId: string,
+    warehouseId: string,
+    quantityToDeduct: number,
+    userId: string,
+    transactionType: 'consumption' | 'sale' | 'adjustment' | 'expiration' | 'transfer',
+    notes: string,
+    referenceId?: string,
+    referenceType?: string
+) {
+    if (quantityToDeduct <= 0) return { success: true };
+
+    // 1. Obtener lotes activos del producto en el almacén seleccionado ordenados por FEFO
+    const { data: batches, error: batchErr } = await supabaseAdmin
+        .from("inventory_batches")
+        .select("*")
+        .eq("product_id", productId)
+        .eq("warehouse_id", warehouseId)
+        .gt("quantity", 0)
+        .order("expiry_date", { ascending: true, nullsFirst: false })
+        .order("created_at", { ascending: true });
+
+    if (batchErr || !batches || batches.length === 0) {
+        throw new Error("No hay stock disponible en el almacén seleccionado para este producto.");
+    }
+
+    // Verificar si el stock total en el almacén es suficiente
+    const totalAvailable = batches.reduce((sum: number, b: any) => sum + Number(b.quantity), 0);
+    if (totalAvailable < quantityToDeduct) {
+        throw new Error(`Stock insuficiente en el almacén. Solicitado: ${quantityToDeduct}, Disponible: ${totalAvailable}`);
+    }
+
+    let remaining = quantityToDeduct;
+
+    for (const batch of batches) {
+        if (remaining <= 0) break;
+        const take = Math.min(Number(batch.quantity), remaining);
+
+        // Actualizar la cantidad del lote
+        const { error: updateErr } = await supabaseAdmin
+            .from("inventory_batches")
+            .update({ quantity: Number(batch.quantity) - take })
+            .eq("id", batch.id);
+
+        if (updateErr) throw updateErr;
+
+        // Registrar la transacción
+        const { error: txErr } = await supabaseAdmin
+            .from("inventory_transactions")
+            .insert({
+                clinic_id: clinicId,
+                product_id: productId,
+                batch_id: batch.id,
+                warehouse_id: warehouseId,
+                transaction_type: transactionType,
+                quantity: -take,
+                notes: notes,
+                created_by: userId,
+                reference_id: referenceId || null,
+                reference_type: referenceType || null
+            });
+
+        if (txErr) throw txErr;
+
+        remaining -= take;
+    }
+
+    return { success: true };
+}
+
+export async function addStockManual(
+    supabaseAdmin: any,
+    clinicId: string,
+    productId: string,
+    warehouseId: string,
+    quantityToAdd: number,
+    userId: string,
+    transactionType: 'purchase' | 'adjustment' | 'return',
+    notes: string
+) {
+    if (quantityToAdd <= 0) return { success: true };
+
+    // 1. Crear un lote nuevo para el ingreso manual para trazabilidad FEFO
+    const batchNumber = "AJUSTE-ING-" + new Date().toISOString().slice(0, 10) + "-" + Math.floor(1000 + Math.random() * 9000);
+    const { data: newBatch, error: batchErr } = await supabaseAdmin
+        .from("inventory_batches")
+        .insert({
+            product_id: productId,
+            warehouse_id: warehouseId,
+            batch_number: batchNumber,
+            expiry_date: null,
+            quantity: quantityToAdd
+        })
+        .select()
+        .single();
+
+    if (batchErr || !newBatch) throw batchErr || new Error("Error registrando lote");
+
+    // 2. Registrar la transacción
+    const { error: txErr } = await supabaseAdmin
+        .from("inventory_transactions")
+        .insert({
+            clinic_id: clinicId,
+            product_id: productId,
+            batch_id: newBatch.id,
+            warehouse_id: warehouseId,
+            transaction_type: transactionType,
+            quantity: quantityToAdd,
+            notes: notes,
+            created_by: userId
+        });
+
+    if (txErr) throw txErr;
+
+    return { success: true };
+}
+
+export async function adjustInventory(
+    productId: string,
+    warehouseId: string,
+    quantity: number,
+    type: 'consumption' | 'adjustment' | 'return',
+    notes: string
+) {
+    const supabase = await createClient();
+    const supabaseAdmin = createAdminClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, message: "No autorizado" };
+
+    const { data: member } = await supabaseAdmin
+        .from("clinic_members")
+        .select("clinic_id")
+        .eq("user_id", user.id)
+        .single();
+
+    if (!member) return { success: false, message: "No asociado a una clínica" };
+
+    try {
+        if (quantity < 0) {
+            // Retirar stock (consumo)
+            await deductStockFEFO(
+                supabaseAdmin,
+                member.clinic_id,
+                productId,
+                warehouseId,
+                Math.abs(quantity),
+                user.id,
+                type as any,
+                notes
+            );
+        } else if (quantity > 0) {
+            // Agregar stock (ingreso)
+            await addStockManual(
+                supabaseAdmin,
+                member.clinic_id,
+                productId,
+                warehouseId,
+                quantity,
+                user.id,
+                type === 'return' ? 'return' : 'adjustment',
+                notes
+            );
+        }
+        
+        revalidatePath("/dashboard/inventory");
+        revalidatePath("/dashboard/inventory/movements");
+        return { success: true, message: "Inventario ajustado correctamente" };
+    } catch (err: any) {
+        console.error("Error in adjustInventory:", err);
+        return { success: false, message: err.message || "Error al ajustar inventario" };
+    }
 }

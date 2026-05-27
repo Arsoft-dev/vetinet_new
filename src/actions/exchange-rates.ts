@@ -60,12 +60,19 @@ export async function syncExchangeRate() {
     // 1. Get user's clinic and settings
     const { data: member } = await supabaseAdmin
         .from("clinic_members")
-        .select("clinic_id, clinics(settings)")
+        .select("clinic_id, clinics(settings, billing_enabled)")
         .eq("user_id", user.id)
         .single();
 
     if (!member) return null;
     const clinicId = member.clinic_id;
+    const billingEnabled = (member.clinics as any)?.billing_enabled ?? true;
+    
+    if (!billingEnabled) {
+        console.log("Sincronización de tasas omitida: Facturación deshabilitada.");
+        return null;
+    }
+
     const settings = (member.clinics as any)?.settings || {};
 
     const preferredCurrency = settings.preferred_currency || 'USD';
@@ -197,11 +204,14 @@ export async function getRateContext() {
 
     const { data: member } = await supabaseAdmin
         .from("clinic_members")
-        .select("clinic_id, clinics(settings)")
+        .select("clinic_id, clinics(settings, billing_enabled)")
         .eq("user_id", user.id)
         .single();
 
     if (!member) return null;
+    const billingEnabled = (member.clinics as any)?.billing_enabled ?? true;
+    if (!billingEnabled) return null;
+    
     const settings = (member.clinics as any)?.settings || {};
     const preferredCurrency = settings.preferred_currency || 'USD';
     const isManual = settings.exchange_rate_mode === 'manual';

@@ -121,7 +121,11 @@ export default async function PatientDetailPage({
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <SharePatientAction token={patient.share_token} />
+                    <SharePatientAction 
+                        token={patient.share_token} 
+                        phone={patient.clients?.phone}
+                        patientName={patient.name}
+                    />
                 </div>
             </div>
 

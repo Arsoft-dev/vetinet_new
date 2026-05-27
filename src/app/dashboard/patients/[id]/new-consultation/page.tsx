@@ -26,6 +26,24 @@ export default async function NewConsultationPage({
         return redirect(`/dashboard/patients/${id}`);
     }
 
+    // Fetch billing configuration
+    const { data: { user } } = await supabase.auth.getUser();
+    let billingEnabled = true;
+
+    if (user) {
+        const { createAdminClient } = await import("@/lib/supabase/admin");
+        const supabaseAdmin = createAdminClient();
+        const { data: member } = await supabaseAdmin
+            .from("clinic_members")
+            .select("clinics(billing_enabled)")
+            .eq("user_id", user.id)
+            .single();
+        
+        if (member) {
+            billingEnabled = (member.clinics as any)?.billing_enabled ?? true;
+        }
+    }
+
     return (
         <div className="space-y-6 max-w-4xl mx-auto">
 
@@ -43,7 +61,7 @@ export default async function NewConsultationPage({
             </div>
 
             {/* Client Form */}
-            <ConsultationForm petId={id} petName={patient.name} />
+            <ConsultationForm petId={id} petName={patient.name} billingEnabled={billingEnabled} />
 
         </div>
     );

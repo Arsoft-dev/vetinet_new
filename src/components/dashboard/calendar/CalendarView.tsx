@@ -7,7 +7,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import esLocale from "@fullcalendar/core/locales/es";
-import { Plus, X, Calendar as CalendarIcon, Clock, User, MessageSquare, Trash2 } from "lucide-react";
+import { Plus, X, Calendar as CalendarIcon, Clock, User, MessageSquare, Trash2, Filter } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { createAppointment, updateAppointment, deleteAppointment } from "@/actions/appointments";
@@ -18,19 +18,31 @@ import { ConfirmationModal } from "@/components/ui/ConfirmationModal";
 interface CalendarViewProps {
     initialEvents: any[];
     pets: any[];
+    vets: any[];
+    userRole: string;
+    currentUserId: string;
 }
 
-export function CalendarView({ initialEvents, pets }: CalendarViewProps) {
+export function CalendarView({ initialEvents, pets, vets, userRole, currentUserId }: CalendarViewProps) {
     const calendarRef = useRef<FullCalendar>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState<{ start: string; end: string } | null>(null);
     const [selectedEvent, setSelectedEvent] = useState<any>(null);
     const [isPending, startTransition] = useTransition();
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [filterDoctorId, setFilterDoctorId] = useState<string>("all");
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
+    const filteredEvents = initialEvents.filter(app => {
+        if (filterDoctorId !== "all") {
+            if (filterDoctorId === "none") return !app.doctor_id;
+            return app.doctor_id === filterDoctorId;
+        }
+        return true;
+    });
+
     // Map DB events to FullCalendar format
-    const events = initialEvents.map(app => {
+    const events = filteredEvents.map(app => {
         let bgColor = '#e0f2fe'; // Light Blue (Scheduled)
         let borderColor = '#0ea5e9'; // Scientific Blue
         let textColor = '#0369a1'; // Dark Blue
@@ -49,13 +61,16 @@ export function CalendarView({ initialEvents, pets }: CalendarViewProps) {
             textColor = '#b45309';
         }
 
+        const doctorName = app.doctor?.full_name ? ` (Dr. ${app.doctor.full_name.split(' ')[0]})` : '';
+
         return {
             id: app.id,
-            title: `${app.pet?.name || "Sin Mascota"} - ${app.reason}`,
+            title: `${app.pet?.name || "Sin Mascota"}${doctorName}`,
             start: app.start_time,
             end: app.end_time,
             extendedProps: {
                 petId: app.pet_id,
+                doctorId: app.doctor_id,
                 reason: app.reason,
                 notes: app.notes,
                 status: app.status
@@ -120,6 +135,7 @@ export function CalendarView({ initialEvents, pets }: CalendarViewProps) {
         const formData = new FormData(e.currentTarget);
         
         const petId = formData.get("petId");
+        const doctorId = formData.get("doctorId");
         const reason = formData.get("reason");
         const notes = formData.get("notes");
         const appointmentTime = formData.get("time") as string;
@@ -135,12 +151,12 @@ export function CalendarView({ initialEvents, pets }: CalendarViewProps) {
             return;
         }
 
-        // Construct Start and End ISO strings
         const startDateTime = new Date(`${baseDateStr}T${appointmentTime}`);
-        const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000); // Default 1 hour duration
+        const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000); 
 
         const data = {
             pet_id: petId,
+            doctor_id: doctorId || null,
             start_time: startDateTime.toISOString(),
             end_time: endDateTime.toISOString(),
             reason,
@@ -185,16 +201,8 @@ export function CalendarView({ initialEvents, pets }: CalendarViewProps) {
         setShowDeleteConfirm(true);
     };
 
-    // Helper to extract time from ISO
-    const getTimeFromISO = (isoString?: string) => {
-        if (!isoString) return "08:00";
-        if (!isoString.includes("T")) return "08:00";
-        const date = new Date(isoString);
-        return date.toTimeString().slice(0, 5);
-    };
-
     return (
-        <div className="h-full relative font-sans">
+        <div className="h-full relative flex flex-col font-sans">
             <style jsx global>{`
                 .fc { 
                     --fc-border-color: #f1f5f9; 
@@ -238,55 +246,58 @@ export function CalendarView({ initialEvents, pets }: CalendarViewProps) {
                 .dark .fc-list-day-text, .dark .fc-list-day-side-text { color: #94a3b8 !important; }
                 .dark .fc-list-day { background-color: #0f172a !important; color: #f8fafc !important; }
 
-                /* Custom Scrollbar for Calendar */
                 .fc-scroller::-webkit-scrollbar { width: 6px; }
                 .fc-scroller::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
                 .dark .fc-scroller::-webkit-scrollbar-thumb { background: #334155; }
 
                 @media (max-width: 768px) {
-                    .fc .fc-toolbar { 
-                        flex-direction: column; 
-                        gap: 12px; 
-                        align-items: center;
-                    }
-                    .fc .fc-toolbar-title { 
-                        order: -1; 
-                        font-size: 1.1rem; 
-                        width: 100%;
-                        text-align: center;
-                    }
-                    .fc .fc-button { 
-                        padding: 0.6rem 0.8rem; 
-                        font-size: 0.6rem; 
-                        border-radius: 12px;
-                    }
-                    .fc .fc-header-toolbar {
-                        margin-bottom: 1rem !important;
-                    }
+                    .fc .fc-toolbar { flex-direction: column; gap: 12px; align-items: center; }
+                    .fc .fc-toolbar-title { order: -1; font-size: 1.1rem; width: 100%; text-align: center; }
+                    .fc .fc-button { padding: 0.6rem 0.8rem; font-size: 0.6rem; border-radius: 12px; }
+                    .fc .fc-header-toolbar { margin-bottom: 1rem !important; }
                 }
             `}</style>
             
-            <FullCalendar
-                ref={calendarRef}
-                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-                initialView="dayGridMonth"
-                headerToolbar={{
-                    left: "prev,next today",
-                    center: "title",
-                    right: "dayGridMonth,timeGridWeek,timeGridDay,listMonth"
-                }}
-                locale={esLocale}
-                events={events}
-                editable={true}
-                selectable={true}
-                selectMirror={true}
-                dayMaxEvents={4}
-                weekends={true}
-                select={handleDateSelect}
-                eventClick={handleEventClick}
-                eventDrop={handleEventDrop}
-                height="100%"
-            />
+            {userRole !== 'vet' && (
+                <div className="flex items-center gap-2 mb-4">
+                    <Filter size={16} className="text-slate-400" />
+                    <select 
+                        value={filterDoctorId}
+                        onChange={(e) => setFilterDoctorId(e.target.value)}
+                        className="bg-slate-50 dark:bg-slate-800 text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-300 px-4 py-2 rounded-xl border-none outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                    >
+                        <option value="all">Todas las Citas (Global)</option>
+                        <option value="none">Citas Generales (Sin Médico)</option>
+                        {vets.map(v => (
+                            <option key={v.id} value={v.id}>Citas Dr. {v.name}</option>
+                        ))}
+                    </select>
+                </div>
+            )}
+
+            <div className="flex-1 min-h-0">
+                <FullCalendar
+                    ref={calendarRef}
+                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+                    initialView="dayGridMonth"
+                    headerToolbar={{
+                        left: "prev,next today",
+                        center: "title",
+                        right: "dayGridMonth,timeGridWeek,timeGridDay,listMonth"
+                    }}
+                    locale={esLocale}
+                    events={events}
+                    editable={true}
+                    selectable={true}
+                    selectMirror={true}
+                    dayMaxEvents={4}
+                    weekends={true}
+                    select={handleDateSelect}
+                    eventClick={handleEventClick}
+                    eventDrop={handleEventDrop}
+                    height="100%"
+                />
+            </div>
 
             <AnimatePresence>
                 {isModalOpen && (
@@ -296,6 +307,9 @@ export function CalendarView({ initialEvents, pets }: CalendarViewProps) {
                         selectedDate={selectedDate}
                         selectedEvent={selectedEvent}
                         pets={pets}
+                        vets={vets}
+                        userRole={userRole}
+                        currentUserId={currentUserId}
                         isPending={isPending}
                         handleSubmit={handleSubmit}
                         handleStatusUpdate={handleStatusUpdate}
@@ -320,16 +334,8 @@ export function CalendarView({ initialEvents, pets }: CalendarViewProps) {
 }
 
 function AppointmentFormModal({ 
-    isOpen, 
-    onClose, 
-    selectedDate, 
-    selectedEvent, 
-    pets, 
-    isPending, 
-    handleSubmit, 
-    handleStatusUpdate, 
-    handleDelete,
-    isDesktop 
+    isOpen, onClose, selectedDate, selectedEvent, pets, vets, userRole, currentUserId,
+    isPending, handleSubmit, handleStatusUpdate, handleDelete, isDesktop 
 }: any) {
     const getTimeFromISO = (isoString?: string) => {
         if (!isoString) return "08:00";
@@ -358,6 +364,27 @@ function AppointmentFormModal({
                     </div>
 
                     <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Médico Tratante (Opcional)</label>
+                        <div className="relative group">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
+                                <User size={20} />
+                            </div>
+                            {userRole === 'vet' ? (
+                                <select name="doctorId" defaultValue={currentUserId} className="w-full pl-12 pr-10 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all appearance-none cursor-not-allowed opacity-80" aria-readonly="true">
+                                    <option value={currentUserId}>Asignada a mí</option>
+                                </select>
+                            ) : (
+                                <select name="doctorId" defaultValue={selectedEvent?.doctorId || ""} className="w-full pl-12 pr-10 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all cursor-pointer appearance-none">
+                                    <option value="">Cita General (Sin Médico)</option>
+                                    {vets.map((v: any) => (
+                                        <option key={v.id} value={v.id}>Dr. {v.name}</option>
+                                    ))}
+                                </select>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="space-y-3">
                         <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Hora Programada</label>
                         <div className="relative group">
                             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
@@ -372,7 +399,9 @@ function AppointmentFormModal({
                             />
                         </div>
                     </div>
+                </div>
 
+                <div className="space-y-6 md:space-y-8 flex flex-col">
                     <div className="space-y-3">
                         <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Motivo</label>
                         <div className="relative group">
@@ -382,15 +411,15 @@ function AppointmentFormModal({
                             <input name="reason" defaultValue={selectedEvent?.reason || ""} placeholder="Ej. Control Médico" required className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all" />
                         </div>
                     </div>
-                </div>
 
-                <div className="space-y-3 flex flex-col">
-                    <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Notas y Observaciones</label>
-                    <div className="relative flex-1 group">
-                        <div className="absolute left-4 top-4 text-slate-400 group-focus-within:text-primary transition-colors">
-                            <MessageSquare size={20} />
+                    <div className="space-y-3 flex-1 flex flex-col">
+                        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Notas y Observaciones</label>
+                        <div className="relative flex-1 group">
+                            <div className="absolute left-4 top-4 text-slate-400 group-focus-within:text-primary transition-colors">
+                                <MessageSquare size={20} />
+                            </div>
+                            <textarea name="notes" defaultValue={selectedEvent?.notes || ""} placeholder="Instrucciones especiales..." className="w-full h-full min-h-[120px] md:min-h-[150px] pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[2rem] font-medium text-slate-600 dark:text-slate-400 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all resize-none" />
                         </div>
-                        <textarea name="notes" defaultValue={selectedEvent?.notes || ""} placeholder="Instrucciones especiales..." className="w-full h-full min-h-[150px] md:min-h-[200px] pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[2rem] font-medium text-slate-600 dark:text-slate-400 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all resize-none" />
                     </div>
                 </div>
             </div>

@@ -5,6 +5,8 @@ import { MainContent } from "@/components/dashboard/wrappers/MainContent";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isSuperAdmin, getActiveAnnouncement } from "@/actions/superadmin";
+import { RealtimeBanner } from "@/components/dashboard/RealtimeBanner";
 
 export default async function DashboardLayout({
     children,
@@ -15,15 +17,16 @@ export default async function DashboardLayout({
     const supabaseAdmin = createAdminClient();
     
     const { data: { user } } = await supabase.auth.getUser();
-    const { isSuperAdmin } = await import("@/actions/superadmin");
     let isSA = false;
     let role = 'staff';
+    
+    let clinicConfig = { billing_enabled: true };
     
     if (user) {
         isSA = await isSuperAdmin();
         const { data: member } = await supabaseAdmin
             .from("clinic_members")
-            .select("status, role, clinics(subscription_status)")
+            .select("status, role, clinics(subscription_status, billing_enabled)")
             .eq("user_id", user.id)
             .single();
 
@@ -38,9 +41,13 @@ export default async function DashboardLayout({
             role = member.role;
             const clinic = member.clinics as any;
             
-            if (clinic && clinic.subscription_status === 'suspended') {
-                await supabase.auth.signOut();
-                redirect("/login?error=clinic_suspended");
+            if (clinic) {
+                clinicConfig.billing_enabled = clinic.billing_enabled ?? true;
+                
+                if (clinic.subscription_status === 'suspended') {
+                    await supabase.auth.signOut();
+                    redirect("/login?error=clinic_suspended");
+                }
             }
             
             if (member.status === 'inactive') {
@@ -50,26 +57,18 @@ export default async function DashboardLayout({
         }
     }
 
-    const { getActiveAnnouncement } = await import("@/actions/superadmin");
     const activeMessage = await getActiveAnnouncement();
-
-    const AnnouncementBanner = activeMessage ? (
-        <div className="bg-indigo-500 text-white text-sm font-bold text-center px-4 py-3 shadow-md flex items-center justify-center gap-2">
-            <span className="animate-pulse">🔔</span>
-            {activeMessage}
-        </div>
-    ) : null;
 
     return (
         <DashboardLayoutWrapper>
             <div className="min-h-screen bg-background transition-colors duration-300">
-                <Sidebar userRole={role} isSuperAdmin={isSA} />
+                <Sidebar userRole={role} isSuperAdmin={isSA} clinicConfig={clinicConfig} />
 
                 <MainContent>
                     <Header />
                     
-                    {/* System Announcement Banner */}
-                    {AnnouncementBanner}
+                    {/* System Announcement Banner (Realtime) */}
+                    <RealtimeBanner initialMessage={activeMessage} />
 
                     <main className="flex-1 p-8 print:p-0">
                         <div className="max-w-7xl mx-auto print:max-w-none">

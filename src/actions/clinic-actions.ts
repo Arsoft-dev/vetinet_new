@@ -19,6 +19,21 @@ export async function getClinicData() {
     return (member?.clinics as any) || null;
 }
 
+export async function isBillingEnabled() {
+    const supabaseAdmin = createAdminClient();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    const { data: member } = await supabaseAdmin
+        .from("clinic_members")
+        .select("clinics(billing_enabled)")
+        .eq("user_id", user.id)
+        .single();
+
+    return (member?.clinics as any)?.billing_enabled ?? true;
+}
+
 export async function updateClinicData(formData: FormData) {
     const supabase = await createClient();
     const supabaseAdmin = createAdminClient();

@@ -4,6 +4,9 @@ import { Receipt, Plus, TrendingUp, Wallet, Banknote } from "lucide-react";
 import Link from "next/link";
 import { InvoiceTable } from "@/components/dashboard/billing/InvoiceTable";
 
+import { isBillingEnabled } from "@/actions/clinic-actions";
+import { redirect } from "next/navigation";
+
 export default async function BillingPage() {
     // Fetch a larger set of invoices for the list
     const invoices = await getInvoices(100); 

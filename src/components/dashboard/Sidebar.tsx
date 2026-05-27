@@ -31,19 +31,33 @@ const menuItems = [
     { icon: Stethoscope, label: "Consultas", href: "/dashboard/consultations", roles: ['admin', 'vet'] },
     { icon: Activity, label: "Hospital", href: "/dashboard/hospital", roles: ['admin', 'vet'] },
     { icon: Pill, label: "Tratamientos", href: "/dashboard/treatments", roles: ['admin', 'vet'] },
-    { icon: Boxes, label: "Inventario", href: "/dashboard/inventory", roles: ['admin', 'cashier'] },
+    { icon: Boxes, label: "Inventario", href: "/dashboard/inventory", roles: ['admin', 'vet', 'cashier'] },
     { icon: Receipt, label: "Facturación", href: "/dashboard/billing", roles: ['admin', 'cashier'] },
     { icon: Settings, label: "Configuración", href: "/dashboard/settings", roles: ['admin', 'vet', 'cashier', 'receptionist'] }, // Settings handles own roles internally
 ];
 
-export function Sidebar({ userRole = 'staff', isSuperAdmin = false }: { userRole?: string, isSuperAdmin?: boolean }) {
+export function Sidebar({ 
+    userRole = 'staff', 
+    isSuperAdmin = false,
+    clinicConfig = { billing_enabled: true } 
+}: { 
+    userRole?: string, 
+    isSuperAdmin?: boolean,
+    clinicConfig?: { billing_enabled: boolean }
+}) {
     const pathname = usePathname();
     const { isOpen, isCollapsed, toggleCollapse, close } = useSidebar();
     
     // Fallback logic for basic user (treat 'staff' as 'admin' temporarily if not strictly defined)
     const normalizedRole = ['admin', 'vet', 'cashier', 'receptionist'].includes(userRole) ? userRole : 'admin';
 
-    const visibleItems = menuItems.filter(item => item.roles.includes(normalizedRole));
+    const visibleItems = menuItems.filter(item => {
+        // Hide billing related items if disabled
+        if (!clinicConfig.billing_enabled && (item.href === "/dashboard/billing" || item.href === "/dashboard/billing/cash")) {
+            return false;
+        }
+        return item.roles.includes(normalizedRole);
+    });
 
     return (
         <>

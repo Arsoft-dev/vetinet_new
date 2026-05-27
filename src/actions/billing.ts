@@ -9,12 +9,17 @@ export async function getInvoices(limit = 10) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
+    const supabaseAdmin = createAdminClient();
+    const { data: member } = await supabaseAdmin.from("clinic_members").select("clinic_id").eq("user_id", user.id).single();
+    if (!member) return [];
+
     const { data: invoices, error } = await supabase
         .from("invoices")
         .select(`
             *,
             client:clients(full_name, identification_doc)
         `)
+        .eq("clinic_id", member.clinic_id)
         .order("created_at", { ascending: false })
         .limit(limit);
 
@@ -156,6 +161,12 @@ export async function createInvoice({ clientId, items, totalUSD, exchangeRate, t
             console.error("Error updating stock", stockError);
             // Note: Invoice exists but stock failed. In production use transaction/rollback.
             return { success: true, invoice, warning: "Factura creada pero hubo error al descontar inventario" };
+        }
+
+        // Disparar alerta en tiempo real para todos los items procesados
+        const { notifyLowStockAlert } = await import("@/actions/notify-low-stock");
+        for (const tx of inventoryTransactions) {
+            await notifyLowStockAlert(tx.product_id, member.clinic_id);
         }
     }
 

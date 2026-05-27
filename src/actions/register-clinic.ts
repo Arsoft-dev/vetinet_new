@@ -33,7 +33,7 @@ export async function registerClinic(prevState: any, formData: FormData): Promis
             .from("clinics")
             .insert({
                 name: clinicName,
-                // slug: ... generate slug based on name? optional for now
+                subscription_plan: 'Trial'
             })
             .select()
             .single();

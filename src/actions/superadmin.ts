@@ -72,7 +72,8 @@ export async function getAllClinics() {
         .from("clinics")
         .select(`
             id, name, legal_name, email_contact, phone, 
-            subscription_plan, subscription_status, subscription_end_date, created_at
+            subscription_plan, subscription_status, subscription_end_date, created_at,
+            billing_enabled
         `)
         .order("created_at", { ascending: false });
 
@@ -97,6 +98,23 @@ export async function updateClinicSubscription(clinicId: string, plan: string, s
     if (error) return { success: false, message: error.message };
 
     revalidatePath("/superadmin/clinics");
+    return { success: true };
+}
+
+export async function toggleClinicBilling(clinicId: string, enabled: boolean) {
+    const isSA = await isSuperAdmin();
+    if (!isSA) return { success: false, message: "No autorizado" };
+
+    const supabaseAdmin = createAdminClient();
+    const { error } = await supabaseAdmin
+        .from("clinics")
+        .update({ billing_enabled: enabled })
+        .eq("id", clinicId);
+
+    if (error) return { success: false, message: error.message };
+
+    revalidatePath("/superadmin/clinics");
+    revalidatePath("/dashboard", "layout");
     return { success: true };
 }
 
@@ -248,4 +266,57 @@ export async function getActiveAnnouncement() {
         .single();
         
     return data?.message || null;
+}
+
+export async function deleteClinicPermanent(clinicId: string) {
+    const isSA = await isSuperAdmin();
+    if (!isSA) return { success: false, message: "No autorizado" };
+
+    const supabaseAdmin = createAdminClient();
+
+    try {
+        // Ejecutamos borrado en cascada manual (bottom-up)
+        // Usamos el cliente de admin para saltarnos RLS
+        const tables = [
+            "payments",
+            "invoice_items",
+            "invoices",
+            "consultation_items",
+            "medical_records",
+            "vaccinations",
+            "pets",
+            "clients",
+            "inventory_transactions",
+            "inventory_audits",
+            "inventory_transfers",
+            "inventory_movements",
+            "purchase_order_items",
+            "purchase_orders",
+            "inventory_batches",
+            "product_kit_items",
+            "product_kits",
+            "products",
+            "suppliers",
+            "warehouses",
+            "cash_registers",
+            "clinic_members"
+        ];
+
+        for (const table of tables) {
+            await supabaseAdmin.from(table).delete().eq("clinic_id", clinicId);
+        }
+
+        // Finalmente, eliminamos la clínica
+        const { error } = await supabaseAdmin.from("clinics").delete().eq("id", clinicId);
+        
+        if (error) throw error;
+
+        revalidatePath("/superadmin/clinics");
+        revalidatePath("/dashboard", "layout");
+        
+        return { success: true };
+    } catch (error: any) {
+        console.error("Error al borrar clínica:", error);
+        return { success: false, message: error.message || "Error eliminando datos en cascada" };
+    }
 }

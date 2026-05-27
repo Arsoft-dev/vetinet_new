@@ -59,8 +59,16 @@ export function PatientListItem({ patient }: PatientListItemProps) {
     const handleQrClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         const baseUrl = window.location.origin;
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${baseUrl}/pet/${patient.public_token}`;
-        window.open(qrUrl, '_blank');
+        const shareUrl = `${baseUrl}/pet/${patient.public_token}`;
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${shareUrl}`;
+        
+        const ownerPhone = patient.clients?.phone;
+        if (ownerPhone) {
+            const message = encodeURIComponent(`Hola, aquí tienes el Código QR de emergencia de ${patient.name}: ${qrUrl}`);
+            window.open(`https://wa.me/${ownerPhone.replace(/\D/g, '')}?text=${message}`, '_blank');
+        } else {
+            window.open(qrUrl, '_blank');
+        }
     };
 
     const handlePrint = (e: React.MouseEvent) => {
@@ -73,11 +81,17 @@ export function PatientListItem({ patient }: PatientListItemProps) {
         const baseUrl = window.location.origin;
         const shareUrl = `${baseUrl}/share/${patient.share_token}`;
         
-        try {
-            await navigator.clipboard.writeText(shareUrl);
-            toast.success("Enlace del Portal del Dueño copiado al portapapeles");
-        } catch (err) {
-            toast.error("Error al copiar el enlace");
+        const ownerPhone = patient.clients?.phone;
+        if (ownerPhone) {
+            const message = encodeURIComponent(`Hola, aquí puedes ver la historia clínica y portal de ${patient.name}: ${shareUrl}`);
+            window.open(`https://wa.me/${ownerPhone.replace(/\D/g, '')}?text=${message}`, '_blank');
+        } else {
+            try {
+                await navigator.clipboard.writeText(shareUrl);
+                toast.success("Enlace del Portal del Dueño copiado al portapapeles");
+            } catch (err) {
+                toast.error("Error al copiar el enlace");
+            }
         }
     };
 

@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
     // empty to silence the error as suggested
   },
   output: 'standalone',
+  serverExternalPackages: ['pdfkit'],
   typescript: {
       // Ignoramos errores de tipos en build porque un archivo autogenerado de Next.js (.next) está corrupto
       ignoreBuildErrors: true,

@@ -23,7 +23,8 @@ export async function getAppointments() {
         .from("appointments")
         .select(`
             *,
-            pet:pets(name, species)
+            pet:pets(name, species),
+            doctor:users!doctor_id(full_name)
         `)
         .eq("clinic_id", memberData.clinic_id)
         .order("start_time", { ascending: true });
@@ -72,7 +73,8 @@ export async function createAppointment(formData: any) {
         .insert({
             clinic_id: memberData.clinic_id,
             pet_id: formData.pet_id || null,
-            user_id: user.id, // Assigned vet
+            user_id: user.id, // Creador de la cita
+            doctor_id: formData.doctor_id || null,
             start_time: formData.start_time,
             end_time: formData.end_time,
             reason: formData.reason,

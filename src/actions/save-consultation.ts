@@ -216,14 +216,45 @@ export async function saveConsultation(
 
                     // B. Deduct Stock (Physical Products Only)
                     if (item.category !== 'Service' && item.category !== 'Other') {
-                        // Fetch batches FIFO
-                        const { data: batches } = await supabaseAdmin
+                        // 1. Buscar almacenes de tipo 'consulting' activos en la clínica
+                        const { data: consultingWarehouses } = await supabaseAdmin
+                            .from("warehouses")
+                            .select("id")
+                            .eq("clinic_id", clinicId)
+                            .eq("type", "consulting")
+                            .eq("is_active", true);
+
+                        let targetWarehouseIds: string[] = [];
+                        if (consultingWarehouses && consultingWarehouses.length > 0) {
+                            targetWarehouseIds = consultingWarehouses.map(w => w.id);
+                        }
+
+                        // 2. Buscar lotes en los almacenes clínicos primero
+                        let batchesQuery = supabaseAdmin
                             .from("inventory_batches")
                             .select("*")
                             .eq("product_id", item.product_id)
-                            .gt("quantity", 0)
+                            .gt("quantity", 0);
+
+                        if (targetWarehouseIds.length > 0) {
+                            batchesQuery = batchesQuery.in("warehouse_id", targetWarehouseIds);
+                        }
+
+                        let { data: batches } = await batchesQuery
                             .order("expiry_date", { ascending: true, nullsFirst: false })
                             .order("created_at", { ascending: true });
+
+                        // 3. Fallback inteligente: si no hay existencias en consulta, buscar en cualquier almacén (incluyendo Principal)
+                        if (!batches || batches.length === 0) {
+                            const { data: fallbackBatches } = await supabaseAdmin
+                                .from("inventory_batches")
+                                .select("*")
+                                .eq("product_id", item.product_id)
+                                .gt("quantity", 0)
+                                .order("expiry_date", { ascending: true, nullsFirst: false })
+                                .order("created_at", { ascending: true });
+                            batches = fallbackBatches;
+                        }
 
                         if (batches && batches.length > 0) {
                             let remaining = item.quantity;
@@ -239,23 +270,28 @@ export async function saveConsultation(
                                     .update({ quantity: Number(batch.quantity) - take })
                                     .eq("id", batch.id);
 
-                                // Log Movement
-                                await supabaseAdmin
-                                    .from("inventory_movements")
-                                    .insert({
-                                        clinic_id: clinicId,
-                                        product_id: item.product_id,
-                                        warehouse_id: batch.warehouse_id,
-                                        batch_id: batch.id,
-                                        user_id: user.id,
-                                        type: 'OUT',
-                                        quantity_change: -take,
-                                        reason: 'Consumo en Consulta',
-                                        reference_id: recordData.id
-                                    });
+                                 // Log Kardex transaction
+                                 await supabaseAdmin
+                                     .from("inventory_transactions")
+                                     .insert({
+                                         clinic_id: clinicId,
+                                         product_id: item.product_id,
+                                         batch_id: batch.id,
+                                         warehouse_id: batch.warehouse_id,
+                                         transaction_type: 'consumption',
+                                         quantity: -take,
+                                         notes: 'Consumo en Consulta',
+                                         created_by: user.id,
+                                         reference_id: recordData.id,
+                                         reference_type: 'medical_record'
+                                     });
 
                                 remaining -= take;
                             }
+
+                            // Disparar alerta en tiempo real
+                            const { notifyLowStockAlert } = await import("@/actions/notify-low-stock");
+                            await notifyLowStockAlert(item.product_id, clinicId);
                         }
                     }
                 }

@@ -2,16 +2,18 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Bell, Check, Trash2, Calendar, Package, TrendingUp, AlertTriangle } from "lucide-react";
-import { getNotifications, getUnreadCount, markAsRead, markAllAsRead } from "@/actions/notifications";
+import { getNotifications, getUnreadCount, markAsRead, markAllAsRead, deleteNotification } from "@/actions/notifications";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 export function NotificationCenter() {
     const [isOpen, setIsOpen] = useState(false);
     const [notifications, setNotifications] = useState<any[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const menuRef = useRef<HTMLDivElement>(null);
+    const router = useRouter();
 
     const refresh = async () => {
         const [data, count] = await Promise.all([
@@ -38,8 +40,30 @@ export function NotificationCenter() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const handleMarkAsRead = async (id: string) => {
-        await markAsRead(id);
+    const handleNotificationClick = async (n: any) => {
+        if (!n.is_read) {
+            await markAsRead(n.id);
+            refresh();
+        }
+        setIsOpen(false);
+        
+        switch (n.type) {
+            case 'stock_low':
+            case 'stock_expiring':
+                router.push('/dashboard/inventory');
+                break;
+            case 'appointment':
+                router.push('/dashboard/agenda');
+                break;
+            case 'bcv_change':
+                router.push('/dashboard');
+                break;
+        }
+    };
+
+    const handleDelete = async (e: React.MouseEvent, id: string) => {
+        e.stopPropagation(); // Evitar que dispare el clic de la notificación
+        await deleteNotification(id);
         refresh();
     };
 
@@ -106,7 +130,7 @@ export function NotificationCenter() {
                                         <div
                                             key={n.id}
                                             className={`p-5 flex gap-4 hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-all cursor-pointer group relative ${!n.is_read ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''}`}
-                                            onClick={() => !n.is_read && handleMarkAsRead(n.id)}
+                                            onClick={() => handleNotificationClick(n)}
                                         >
                                             <div className="shrink-0">
                                                 <div className="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 border border-border/10 dark:border-slate-700 flex items-center justify-center shadow-sm">
@@ -122,10 +146,19 @@ export function NotificationCenter() {
                                                         {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: es })}
                                                     </span>
                                                 </div>
-                                                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed italic">{n.message}</p>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed italic pr-6">{n.message}</p>
                                             </div>
+                                            
+                                            <button 
+                                                onClick={(e) => handleDelete(e, n.id)}
+                                                className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all"
+                                                title="Eliminar Notificación"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+
                                             {!n.is_read && (
-                                                <div className="absolute right-4 bottom-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="absolute right-4 bottom-4 opacity-100 group-hover:opacity-0 transition-opacity">
                                                     <div className="w-2 h-2 rounded-full bg-primary" />
                                                 </div>
                                             )}

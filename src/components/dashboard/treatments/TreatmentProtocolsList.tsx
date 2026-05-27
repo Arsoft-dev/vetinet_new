@@ -269,18 +269,18 @@ export function TreatmentProtocolsList({ initialProtocols }: { initialProtocols:
                         </Drawer.Root>
                     )
                 )}
-
-                <ConfirmationModal
-                    isOpen={!!deleteConfirmId}
-                    onClose={() => setDeleteConfirmId(null)}
-                    onConfirm={handleDelete}
-                    title="¿Eliminar Protocolo?"
-                    description="Esta acción borrará la plantilla permanentemente. No podrás recuperarla después."
-                    confirmText="Sí, Eliminar"
-                    isDestructive={true}
-                    isLoading={isPending}
-                />
             </AnimatePresence>
+
+            <ConfirmationModal
+                isOpen={!!deleteConfirmId}
+                onClose={() => setDeleteConfirmId(null)}
+                onConfirm={handleDelete}
+                title="¿Eliminar Protocolo?"
+                description="Esta acción borrará la plantilla permanentemente. No podrás recuperarla después."
+                confirmText="Sí, Eliminar"
+                isDestructive={true}
+                isLoading={isPending}
+            />
         </div>
     );
 }

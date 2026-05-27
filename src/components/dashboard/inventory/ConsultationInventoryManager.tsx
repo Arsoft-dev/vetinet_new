@@ -116,7 +116,6 @@ export function ConsultationInventoryManager() {
                                         <p className="text-xs text-muted-foreground">{product.category} • stock: {product.totalStock} {product.unit}</p>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-sm font-bold text-emerald-600">${product.sale_price}</span>
                                         <Plus size={16} className="text-primary" />
                                     </div>
                                 </button>
@@ -134,7 +133,6 @@ export function ConsultationInventoryManager() {
                             <div key={item.id} className="flex items-center justify-between gap-3 bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-100 dark:border-slate-800 shadow-sm">
                                 <div className="flex-1">
                                     <p className="font-bold text-sm text-foreground">{item.name}</p>
-                                    <p className="text-xs text-muted-foreground">${item.unit_price} c/u</p>
                                 </div>
 
                                 <div className="flex items-center gap-3">
@@ -158,9 +156,6 @@ export function ConsultationInventoryManager() {
                                             className="px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400"
                                         >+</button>
                                     </div>
-                                    <div className="text-right min-w-[60px]">
-                                        <p className="font-bold text-sm text-foreground">${(item.quantity * item.unit_price).toFixed(2)}</p>
-                                    </div>
                                     <button
                                         type="button"
                                         onClick={() => removeItem(item.product_id)}
@@ -171,11 +166,6 @@ export function ConsultationInventoryManager() {
                                 </div>
                             </div>
                         ))}
-
-                        <div className="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-slate-700">
-                            <span className="font-bold text-sm text-muted-foreground">Total Insumos</span>
-                            <span className="font-bold text-lg text-primary">${calculateTotal().toFixed(2)}</span>
-                        </div>
                     </div>
                 </div>
             )}

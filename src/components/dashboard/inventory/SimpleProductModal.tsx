@@ -2,20 +2,37 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Save, Box } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { updateProduct, createProduct } from "@/actions/inventory";
 import { useRouter } from "next/navigation";
 import { Drawer } from "vaul";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { useBarcodeScanner } from "@/hooks/useBarcodeScanner";
 
 export function CreateProductModal({ isOpen, onClose, productToEdit }: { isOpen: boolean; onClose: () => void; productToEdit?: any }) {
     const [isLoading, setIsLoading] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<string>(productToEdit?.category || "Medication");
+    const [barcode, setBarcode] = useState<string>(productToEdit?.barcode || "");
     const router = useRouter();
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
-    const isEditMode = !!productToEdit;
+    const isEditMode = !!productToEdit && !productToEdit.barcodeOnly;
+
+    // Sincronizar el estado al editar o recibir código de barras precargado
+    useEffect(() => {
+        setBarcode(productToEdit?.barcode || "");
+        setSelectedCategory(productToEdit?.category || "Medication");
+    }, [productToEdit]);
+
+    // Escucha el lector cuando el formulario de producto está abierto
+    useBarcodeScanner({
+        onScan: (scannedBarcode) => {
+            setBarcode(scannedBarcode);
+            toast.success(`Código de barras capturado: ${scannedBarcode}`);
+        },
+        enabled: isOpen
+    });
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -45,9 +62,23 @@ export function CreateProductModal({ isOpen, onClose, productToEdit }: { isOpen:
 
     const FormContent = (
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-            <div className="space-y-1.5">
-                <label className="text-sm font-bold text-foreground dark:text-slate-200 ml-1">Nombre del Producto</label>
-                <input required name="name" defaultValue={productToEdit?.name} type="text" placeholder="Ej: Amoxicilina 500mg" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all dark:text-slate-100" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                    <label className="text-sm font-bold text-foreground dark:text-slate-200 ml-1">Nombre del Producto</label>
+                    <input required name="name" defaultValue={productToEdit?.name} type="text" placeholder="Ej: Amoxicilina 500mg" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all dark:text-slate-100" />
+                </div>
+                <div className="space-y-1.5">
+                    <label className="text-sm font-bold text-foreground dark:text-slate-200 ml-1">Código de Barras (Opcional)</label>
+                    <input 
+                        name="barcode" 
+                        value={barcode} 
+                        onChange={(e) => setBarcode(e.target.value)} 
+                        type="text" 
+                        data-barcode-capture="true"
+                        placeholder="Escanea o escribe el código..." 
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all dark:text-slate-100 font-mono" 
+                    />
+                </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

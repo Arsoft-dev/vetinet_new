@@ -47,6 +47,25 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(url);
     }
 
+    // BILLING GUARD: Block access to billing module if disabled for this clinic
+    if (user && request.nextUrl.pathname.startsWith("/dashboard/billing")) {
+        // Query clinic settings
+        const { data: member } = await supabase
+            .from("clinic_members")
+            .select("clinics(billing_enabled)")
+            .eq("user_id", user.id)
+            .single();
+        
+        const billingEnabled = (member?.clinics as any)?.billing_enabled ?? true;
+        
+        if (!billingEnabled) {
+            const url = request.nextUrl.clone();
+            url.pathname = "/dashboard";
+            url.searchParams.set("error", "billing_disabled");
+            return NextResponse.redirect(url);
+        }
+    }
+
     return response;
 }
 

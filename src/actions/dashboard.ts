@@ -14,13 +14,14 @@ export async function getDashboardStats() {
 
     const { data: memberData } = await supabaseAdmin
         .from("clinic_members")
-        .select("clinic_id, users(full_name)")
+        .select("clinic_id, users(full_name), clinics(billing_enabled)")
         .eq("user_id", user.id)
         .single();
 
     if (!memberData) return null;
 
     const clinicId = memberData.clinic_id;
+    const billingEnabled = (memberData.clinics as any)?.billing_enabled ?? true;
     
     // Adjusted for Venezuela Timezone (UTC-4)
     const now = new Date();
@@ -54,17 +55,22 @@ export async function getDashboardStats() {
         .eq("clinic_id", clinicId)
         .eq("status", "hospitalized");
 
-    // 4. Ingresos del Día (Total sum of all valid invoices today)
-    const { data: incomeData } = await supabaseAdmin
-        .from("invoices")
-        .select("total_amount, total_amount_usd")
-        .eq("clinic_id", clinicId)
-        .neq("status", "voided")
-        .gte("created_at", todayStart)
-        .lte("created_at", todayEnd);
- 
-    const todayIncomeUSD = incomeData?.reduce((sum, inv) => sum + (Number(inv.total_amount_usd) || 0), 0) || 0;
-    const todayIncomeBS = incomeData?.reduce((sum, inv) => sum + (Number(inv.total_amount) || 0), 0) || 0;
+    // 4. Ingresos del Día (Solo si está habilitada la facturación)
+    let todayIncomeUSD = 0;
+    let todayIncomeBS = 0;
+    
+    if (billingEnabled) {
+        const { data: incomeData } = await supabaseAdmin
+            .from("invoices")
+            .select("total_amount, total_amount_usd")
+            .eq("clinic_id", clinicId)
+            .neq("status", "voided")
+            .gte("created_at", todayStart)
+            .lte("created_at", todayEnd);
+    
+        todayIncomeUSD = incomeData?.reduce((sum, inv) => sum + (Number(inv.total_amount_usd) || 0), 0) || 0;
+        todayIncomeBS = incomeData?.reduce((sum, inv) => sum + (Number(inv.total_amount) || 0), 0) || 0;
+    }
 
     // 5. Historial de Actividad (Last 7 days consultations)
     const last7Days = Array.from({ length: 7 }, (_, i) => {
@@ -106,98 +112,102 @@ export async function getDashboardStats() {
         .order("start_time", { ascending: true })
         .limit(5);
 
-    // 7. Ingresos de los últimos 30 días (para evitar gráficos vacíos al inicio del mes)
+    // 7. Ingresos Mensuales y Crecimiento (Solo si está habilitada la facturación)
+    let monthlyIncomeUSD = 0;
+    let monthlyIncomeBS = 0;
+    let incomeGrowth = 0;
     const thirtyDaysAgo = subDays(vetNow, 30).toISOString();
-    const { data: monthlyInvoices } = await supabaseAdmin
-        .from("invoices")
-        .select("total_amount, total_amount_usd, exchange_rate")
-        .eq("clinic_id", clinicId)
-        .neq("status", "voided")
-        .gte("created_at", thirtyDaysAgo);
 
-    const monthlyIncomeUSD = monthlyInvoices?.reduce((sum, inv) => sum + (Number(inv.total_amount_usd) || 0), 0) || 0;
-    const monthlyIncomeBS = monthlyInvoices?.reduce((sum, inv) => sum + (Number(inv.total_amount) || 0), 0) || 0;
+    if (billingEnabled) {
+        const { data: monthlyInvoices } = await supabaseAdmin
+            .from("invoices")
+            .select("total_amount, total_amount_usd, exchange_rate")
+            .eq("clinic_id", clinicId)
+            .neq("status", "voided")
+            .gte("created_at", thirtyDaysAgo);
 
-    // 7.1 Last Month Income (for growth calculation)
-    const lastMonthStart = subDays(new Date(thirtyDaysAgo), 30).toISOString();
-    const lastMonthEnd = thirtyDaysAgo;
-    const { data: lastMonthInvoices } = await supabaseAdmin
-        .from("invoices")
-        .select("total_amount_usd")
-        .eq("clinic_id", clinicId)
-        .neq("status", "voided")
-        .gte("created_at", lastMonthStart)
-        .lte("created_at", lastMonthEnd);
-    
-    const lastMonthIncome = lastMonthInvoices?.reduce((sum, inv) => sum + (Number(inv.total_amount_usd) || 0), 0) || 0;
-    const incomeGrowth = lastMonthIncome > 0 ? ((monthlyIncomeUSD - lastMonthIncome) / lastMonthIncome) * 100 : 0;
+        monthlyIncomeUSD = monthlyInvoices?.reduce((sum, inv) => sum + (Number(inv.total_amount_usd) || 0), 0) || 0;
+        monthlyIncomeBS = monthlyInvoices?.reduce((sum, inv) => sum + (Number(inv.total_amount) || 0), 0) || 0;
 
-    // 8. Top Items (Products/Services)
-    const { data: topItemsData } = await supabaseAdmin
-        .from("invoice_items")
-        .select(`
-            description,
-            total_price,
-            invoices!inner(clinic_id, created_at, status)
-        `)
-        .eq("invoices.clinic_id", clinicId)
-        .neq("invoices.status", "voided")
-        .gte("invoices.created_at", thirtyDaysAgo);
-    
-    const aggregatedItems = (topItemsData || []).reduce((acc: any, item: any) => {
-        if (!acc[item.description]) acc[item.description] = 0;
-        acc[item.description] += Number(item.total_price);
-        return acc;
-    }, {});
-
-    const topItems = Object.entries(aggregatedItems)
-        .map(([name, value]) => ({ name, value: value as number }))
-        .sort((a, b) => b.value - a.value)
-        .slice(0, 5);
-
-    // 9. Payment Methods Distribution (Last 30 days) - Using 'payments' table
-    const { data: paymentsData } = await supabaseAdmin
-        .from("payments")
-        .select(`
-            method,
-            amount_paid_native,
-            currency,
-            invoices!inner(clinic_id, created_at, status, exchange_rate)
-        `)
-        .eq("invoices.clinic_id", clinicId)
-        .neq("invoices.status", "voided")
-        .gte("invoices.created_at", thirtyDaysAgo);
-    
-    const paymentMethods = (paymentsData || []).reduce((acc: any, p: any) => {
-        const methodMap: any = {
-            'EFECTIVO_USD': 'Efectivo $',
-            'EFECTIVO_BS': 'Efectivo Bs',
-            'ZELLE': 'Zelle',
-            'PAGO_MOVIL': 'Pago Móvil',
-            'TDD': 'Punto de Venta',
-            'cash': 'Efectivo',
-            'transfer': 'Transferencia',
-            'pos': 'Punto de Venta'
-        };
-        const method = methodMap[p.method] || 'Otro';
-        if (!acc[method]) acc[method] = 0;
+        // 7.1 Last Month Income
+        const lastMonthStart = subDays(new Date(thirtyDaysAgo), 30).toISOString();
+        const lastMonthEnd = thirtyDaysAgo;
+        const { data: lastMonthInvoices } = await supabaseAdmin
+            .from("invoices")
+            .select("total_amount_usd")
+            .eq("clinic_id", clinicId)
+            .neq("status", "voided")
+            .gte("created_at", lastMonthStart)
+            .lte("created_at", lastMonthEnd);
         
-        // Calculate USD value for the chart normalization
-        const rate = Number((p.invoices as any)?.exchange_rate) || 1;
-        const amountUsd = p.currency === 'VES' ? (Number(p.amount_paid_native) / rate) : Number(p.amount_paid_native);
-        
-        acc[method] += amountUsd;
-        return acc;
-    }, {});
+        const lastMonthIncome = lastMonthInvoices?.reduce((sum, inv) => sum + (Number(inv.total_amount_usd) || 0), 0) || 0;
+        incomeGrowth = lastMonthIncome > 0 ? ((monthlyIncomeUSD - lastMonthIncome) / lastMonthIncome) * 100 : 0;
+    }
 
-    const paymentDistribution = Object.entries(paymentMethods).map(([name, value]) => ({ name, value: value as number }));
-    
-    // Recalculate monthly income based on payments for better accuracy
-    const monthlyIncomeUSDFromPayments = (paymentsData || []).reduce((sum, p) => {
-        const rate = Number((p.invoices as any)?.exchange_rate) || 1;
-        const amountUsd = p.currency === 'VES' ? (Number(p.amount_paid_native) / rate) : Number(p.amount_paid_native);
-        return sum + amountUsd;
-    }, 0);
+    // 8. Top Items (Solo si está habilitada la facturación)
+    let topItems: any[] = [];
+    if (billingEnabled) {
+        const { data: topItemsData } = await supabaseAdmin
+            .from("invoice_items")
+            .select(`
+                description,
+                total_price,
+                invoices!inner(clinic_id, created_at, status)
+            `)
+            .eq("invoices.clinic_id", clinicId)
+            .neq("invoices.status", "voided")
+            .gte("invoices.created_at", thirtyDaysAgo);
+        
+        const aggregatedItems = (topItemsData || []).reduce((acc: any, item: any) => {
+            if (!acc[item.description]) acc[item.description] = 0;
+            acc[item.description] += Number(item.total_price);
+            return acc;
+        }, {});
+
+        topItems = Object.entries(aggregatedItems)
+            .map(([name, value]) => ({ name, value: value as number }))
+            .sort((a, b) => b.value - a.value)
+            .slice(0, 5);
+    }
+
+    // 9. Distribución de Pagos (Solo si está habilitada la facturación)
+    let paymentDistribution: any[] = [];
+    if (billingEnabled) {
+        const { data: paymentsData } = await supabaseAdmin
+            .from("payments")
+            .select(`
+                method,
+                amount_paid_native,
+                currency,
+                invoices!inner(clinic_id, created_at, status, exchange_rate)
+            `)
+            .eq("invoices.clinic_id", clinicId)
+            .neq("invoices.status", "voided")
+            .gte("invoices.created_at", thirtyDaysAgo);
+        
+        const paymentMethods = (paymentsData || []).reduce((acc: any, p: any) => {
+            const methodMap: any = {
+                'EFECTIVO_USD': 'Efectivo $',
+                'EFECTIVO_BS': 'Efectivo Bs',
+                'ZELLE': 'Zelle',
+                'PAGO_MOVIL': 'Pago Móvil',
+                'TDD': 'Punto de Venta',
+                'cash': 'Efectivo',
+                'transfer': 'Transferencia',
+                'pos': 'Punto de Venta'
+            };
+            const method = methodMap[p.method] || 'Otro';
+            if (!acc[method]) acc[method] = 0;
+            
+            const rate = Number((p.invoices as any)?.exchange_rate) || 1;
+            const amountUsd = p.currency === 'VES' ? (Number(p.amount_paid_native) / rate) : Number(p.amount_paid_native);
+            
+            acc[method] += amountUsd;
+            return acc;
+        }, {});
+
+        paymentDistribution = Object.entries(paymentMethods).map(([name, value]) => ({ name, value: value as number }));
+    }
 
     // 10. Total Pacientes
     const { count: totalPatients } = await supabaseAdmin
@@ -215,6 +225,7 @@ export async function getDashboardStats() {
     return {
         vetName: (memberData.users as any)?.full_name || "Doctor",
         clinicName: clinicData?.name || "Clínica",
+        billingEnabled,
         stats: {
             patientsToday: patientsToday || 0,
             pendingAppointments: pendingAppointments || 0,

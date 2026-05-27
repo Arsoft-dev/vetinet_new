@@ -9,15 +9,19 @@ export async function searchClients(query: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
-    // Find which clinic this vet belongs to from clinic_members
-    // We can assume user is logged in
-    // Note: Assuming RLS handles tenant isolation properly, but for clarity let's fetch clinic_id if needed
-    // However, pets and clients are linked to clinic_id. Row Level Security should restrict to clinic.
-    // Let's assume RLS is correct for `select` on `clients`.
+    // Find which clinic this user belongs to
+    const { data: member } = await supabase
+        .from("clinic_members")
+        .select("clinic_id")
+        .eq("user_id", user.id)
+        .single();
+        
+    if (!member) return [];
 
     const { data: clients, error } = await supabase
         .from("clients")
         .select("id, full_name, email, phone, identification_doc, address")
+        .eq("clinic_id", member.clinic_id)
         .or(`full_name.ilike.%${query}%,email.ilike.%${query}%,identification_doc.ilike.%${query}%`)
         .limit(5);
 

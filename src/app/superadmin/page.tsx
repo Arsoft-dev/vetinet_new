@@ -1,4 +1,4 @@
-import { getGlobalMetrics } from "@/actions/superadmin";
+import { getGlobalMetrics, getActiveAnnouncement } from "@/actions/superadmin";
 import { Building2, Users, DollarSign, Activity, Megaphone } from "lucide-react";
 import { SaaSGrowthChart } from "@/components/superadmin/SaaSGrowthChart";
 import { BroadcastForm } from "@/components/superadmin/BroadcastForm";
@@ -6,6 +6,7 @@ import { BroadcastForm } from "@/components/superadmin/BroadcastForm";
 export default async function SuperAdminDashboard() {
     const res = await getGlobalMetrics();
     const metrics = res.success ? res.metrics : { totalClinics: 0, activeClinics: 0, totalPatients: 0, currentMonthRevenue: 0 };
+    const activeMessage = await getActiveAnnouncement();
 
     const statCards = [
         { title: "Total Clínicas", value: metrics?.totalClinics, icon: Building2, color: "text-indigo-400", bg: "bg-indigo-400/10" },
@@ -65,7 +66,7 @@ export default async function SuperAdminDashboard() {
                         </div>
                     </div>
                     
-                    <BroadcastForm />
+                    <BroadcastForm currentAnnouncement={activeMessage || ""} />
                 </div>
             </div>
         </div>

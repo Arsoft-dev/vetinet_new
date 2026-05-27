@@ -4,6 +4,9 @@ import { useState, useEffect, useRef } from 'react';
 import { Search, ShoppingCart, Trash2, Plus, Minus, X, ChevronRight, User, UserPlus, Check, Stethoscope, Syringe, Pill, Sparkles, LayoutGrid, ArrowRight, PackageOpen, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { Drawer } from 'vaul';
+import { useMediaQuery } from '@/hooks/use-media-query';
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 import { getProducts, searchClients, createQuickClient } from '@/actions/pos-actions';
 import { getPendingOrders } from '@/actions/pos-orders';
 import { createInvoice } from '@/actions/billing';
@@ -34,6 +37,8 @@ interface Client {
 
 export function POSWorkspaceThreeColumn({ exchangeRate }: { exchangeRate: number }) {
     const router = useRouter();
+    // Detectar si estamos en desktop para renderizar modal o drawer
+    const isDesktop = useMediaQuery("(min-width: 768px)");
 
     // Core Data
     const [products, setProducts] = useState<Product[]>([]);
@@ -46,6 +51,8 @@ export function POSWorkspaceThreeColumn({ exchangeRate }: { exchangeRate: number
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null); 
     const [isPendingOrdersOpen, setIsPendingOrdersOpen] = useState(false);
     const [pendingOrders, setPendingOrders] = useState<any[]>([]);
+    // Estado para la orden pendiente que el usuario quiere cargar (reemplaza window.confirm)
+    const [pendingOrderToLoad, setPendingOrderToLoad] = useState<any | null>(null);
     const [isLoadingOrders, setIsLoadingOrders] = useState(false);
 
     // Search State
@@ -101,17 +108,14 @@ export function POSWorkspaceThreeColumn({ exchangeRate }: { exchangeRate: number
         setIsLoadingOrders(false);
     };
 
-    const loadPendingOrder = (order: any) => {
-        if (cart.length > 0) {
-            if (!confirm("Esto reemplazará los ítems actuales en el carrito. ¿Deseas continuar?")) return;
-        }
-
+    // Ejecuta la carga efectiva de la orden pendiente al carrito
+    const executeLoadPendingOrder = (order: any) => {
         const newCart: CartItem[] = order.items.map((item: any) => ({
             id: item.productId,
             product_id: item.productId,
             name: item.name,
             price: item.unitPrice,
-            stock: 100, // Bypass stock check
+            stock: 100, // Bypass de stock check
             category: item.category,
             quantity: item.quantity,
             fromConsultation: item.fromConsultation,
@@ -128,6 +132,17 @@ export function POSWorkspaceThreeColumn({ exchangeRate }: { exchangeRate: number
         }
         setIsPendingOrdersOpen(false);
         toast.success("Orden de consulta cargada al carrito");
+    };
+
+    // Intenta cargar una orden: si el carrito tiene ítems, pide confirmación
+    const loadPendingOrder = (order: any) => {
+        if (cart.length > 0) {
+            // Guardar la orden para confirmar con ConfirmationModal
+            setPendingOrderToLoad(order);
+            return;
+        }
+        // Si el carrito está vacío, cargar directamente
+        executeLoadPendingOrder(order);
     };
 
     // Cart Actions
@@ -591,94 +606,215 @@ export function POSWorkspaceThreeColumn({ exchangeRate }: { exchangeRate: number
             {/* Hidden Print Frame */}
             <iframe src={printUrl || undefined} className="hidden" />
 
+            {/* --- Modal Selector de Cliente (responsive: desktop modal / mobile drawer) --- */}
             <AnimatePresence>
                 {isClientModalOpen && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsClientModalOpen(false)} className="absolute inset-0 bg-slate-900/20 backdrop-blur-[2px]" />
-                        <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden z-10 border border-slate-100 dark:border-slate-800 ring-4 ring-slate-200/50 dark:ring-slate-800/50">
-                            <div className="p-8 border-b border-slate-50 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/30">
-                                <div className="flex justify-between items-center gap-4">
-                                    <div className="relative flex-1 group">
-                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 dark:text-slate-500 group-focus-within:text-primary transition-colors" size={20} />
-                                        <input
-                                            autoFocus
-                                            type="text"
-                                            placeholder="Buscar cliente por CI o Nombre..."
-                                            className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 focus:ring-4 focus:ring-primary/10 focus:border-primary/30 outline-none transition-all font-bold text-slate-800 dark:text-slate-100 text-lg placeholder:text-slate-300 dark:placeholder:text-slate-600 shadow-sm"
-                                            value={clientQuery}
-                                            onChange={(e) => setClientQuery(e.target.value)}
-                                        />
+                    isDesktop ? (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsClientModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
+                            <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="relative bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-800 ring-4 ring-slate-200/50 dark:ring-slate-800/50">
+                                {/* Barra de búsqueda del cliente */}
+                                <div className="p-8 border-b border-slate-50 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/30">
+                                    <div className="flex justify-between items-center gap-4">
+                                        <div className="relative flex-1 group">
+                                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 dark:text-slate-500 group-focus-within:text-primary transition-colors" size={20} />
+                                            <input
+                                                autoFocus
+                                                type="text"
+                                                placeholder="Buscar cliente por CI o Nombre..."
+                                                className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 focus:ring-4 focus:ring-primary/10 focus:border-primary/30 outline-none transition-all font-bold text-slate-800 dark:text-slate-100 text-lg placeholder:text-slate-300 dark:placeholder:text-slate-600 shadow-sm"
+                                                value={clientQuery}
+                                                onChange={(e) => setClientQuery(e.target.value)}
+                                            />
+                                        </div>
+                                        <button onClick={() => setIsClientModalOpen(false)} className="p-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 transition-colors"><X size={20} /></button>
                                     </div>
-                                    <button onClick={() => setIsClientModalOpen(false)} className="p-3 hover:bg-slate-100 rounded-full text-slate-400 transition-colors"><X size={20} /></button>
                                 </div>
-                            </div>
-                            <div className="max-h-[350px] overflow-y-auto p-4 space-y-2 custom-scrollbar">
-                                {clientResults.length === 0 && clientQuery.length > 2 && (
-                                    <div className="text-center py-8 text-slate-400">
-                                        <p>No se encontraron clientes</p>
+                                {/* Resultados de búsqueda */}
+                                <div className="max-h-[350px] overflow-y-auto p-4 space-y-2 custom-scrollbar">
+                                    {clientResults.length === 0 && clientQuery.length > 2 && (
+                                        <div className="text-center py-8 text-slate-400">
+                                            <p>No se encontraron clientes</p>
+                                        </div>
+                                    )}
+                                    {clientResults.map(c => (
+                                        <button key={c.id} onClick={() => { setClient(c); setIsClientModalOpen(false); }} className="w-full p-4 flex items-center justify-between hover:bg-emerald-50 dark:hover:bg-emerald-900/20 border border-transparent hover:border-emerald-100 dark:hover:border-emerald-800 rounded-2xl transition-all text-left group">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 group-hover:bg-white dark:group-hover:bg-slate-700 rounded-xl flex items-center justify-center text-slate-400 font-bold text-sm shadow-sm">{c.full_name.charAt(0)}</div>
+                                                <div>
+                                                    <p className="font-bold text-slate-800 dark:text-slate-200 text-base group-hover:text-emerald-700 dark:group-hover:text-emerald-400">{c.full_name}</p>
+                                                    <p className="text-xs text-slate-400 uppercase tracking-wide group-hover:text-emerald-500/70">{c.identification_doc}</p>
+                                                </div>
+                                            </div>
+                                            <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-sm">
+                                                <Check className="text-emerald-500" size={16} strokeWidth={3} />
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        </div>
+                    ) : (
+                        /* Versión móvil: Drawer inferior para seleccionar cliente */
+                        <Drawer.Root open={isClientModalOpen} onOpenChange={(open) => !open && setIsClientModalOpen(false)}>
+                            <Drawer.Portal>
+                                <Drawer.Overlay className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100]" />
+                                <Drawer.Content className="bg-white dark:bg-slate-900 flex flex-col rounded-t-[2.5rem] mt-24 fixed bottom-0 left-0 right-0 z-[110] focus:outline-none max-h-[96vh]">
+                                    {/* Indicador de arrastre */}
+                                    <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-slate-200 dark:bg-slate-700 my-4" />
+                                    <div className="px-6 pb-2">
+                                        <Drawer.Title className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+                                            Buscar Cliente
+                                        </Drawer.Title>
                                     </div>
-                                )}
-                                {clientResults.map(c => (
-                                    <button key={c.id} onClick={() => { setClient(c); setIsClientModalOpen(false); }} className="w-full p-4 flex items-center justify-between hover:bg-emerald-50 dark:hover:bg-emerald-900/20 border border-transparent hover:border-emerald-100 dark:hover:border-emerald-800 rounded-2xl transition-all text-left group">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 group-hover:bg-white dark:group-hover:bg-slate-700 rounded-xl flex items-center justify-center text-slate-400 font-bold text-sm shadow-sm">{c.full_name.charAt(0)}</div>
-                                            <div>
-                                                <p className="font-bold text-slate-800 dark:text-slate-200 text-base group-hover:text-emerald-700 dark:group-hover:text-emerald-400">{c.full_name}</p>
-                                                <p className="text-xs text-slate-400 uppercase tracking-wide group-hover:text-emerald-500/70">{c.identification_doc}</p>
+                                    <div className="flex-1 overflow-y-auto pb-8">
+                                        {/* Barra de búsqueda del cliente (móvil) */}
+                                        <div className="px-6 py-4">
+                                            <div className="relative group">
+                                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 dark:text-slate-500 group-focus-within:text-primary transition-colors" size={20} />
+                                                <input
+                                                    autoFocus
+                                                    type="text"
+                                                    placeholder="Buscar por CI o Nombre..."
+                                                    className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 focus:ring-4 focus:ring-primary/10 focus:border-primary/30 outline-none transition-all font-bold text-slate-800 dark:text-slate-100 text-lg placeholder:text-slate-300 dark:placeholder:text-slate-600 shadow-sm"
+                                                    value={clientQuery}
+                                                    onChange={(e) => setClientQuery(e.target.value)}
+                                                />
                                             </div>
                                         </div>
-                                        <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-sm">
-                                            <Check className="text-emerald-500" size={16} strokeWidth={3} />
+                                        {/* Resultados de búsqueda (móvil) */}
+                                        <div className="px-4 space-y-2">
+                                            {clientResults.length === 0 && clientQuery.length > 2 && (
+                                                <div className="text-center py-8 text-slate-400">
+                                                    <p>No se encontraron clientes</p>
+                                                </div>
+                                            )}
+                                            {clientResults.map(c => (
+                                                <button key={c.id} onClick={() => { setClient(c); setIsClientModalOpen(false); }} className="w-full p-4 flex items-center justify-between hover:bg-emerald-50 dark:hover:bg-emerald-900/20 border border-transparent hover:border-emerald-100 dark:hover:border-emerald-800 rounded-2xl transition-all text-left group">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 group-hover:bg-white dark:group-hover:bg-slate-700 rounded-xl flex items-center justify-center text-slate-400 font-bold text-sm shadow-sm">{c.full_name.charAt(0)}</div>
+                                                        <div>
+                                                            <p className="font-bold text-slate-800 dark:text-slate-200 text-base group-hover:text-emerald-700 dark:group-hover:text-emerald-400">{c.full_name}</p>
+                                                            <p className="text-xs text-slate-400 uppercase tracking-wide group-hover:text-emerald-500/70">{c.identification_doc}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-sm">
+                                                        <Check className="text-emerald-500" size={16} strokeWidth={3} />
+                                                    </div>
+                                                </button>
+                                            ))}
                                         </div>
-                                    </button>
-                                ))}
-                            </div>
-                        </motion.div>
-                    </div>
+                                    </div>
+                                </Drawer.Content>
+                            </Drawer.Portal>
+                        </Drawer.Root>
+                    )
                 )}
             </AnimatePresence>
 
-            {/* Quick Create Client Modal */}
+            {/* --- Modal Crear Cliente Rápido (responsive: desktop modal / mobile drawer) --- */}
             <AnimatePresence>
                 {isCreateClientModalOpen && (
-                    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsCreateClientModalOpen(false)} className="absolute inset-0 bg-slate-900/20 backdrop-blur-[2px]" />
-                        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="bg-white dark:bg-slate-900 w-full max-w-md rounded-3xl shadow-xl z-20 overflow-hidden border border-slate-100 dark:border-slate-800">
-                            <form onSubmit={handleCreateClient} className="p-8">
-                                <div className="flex justify-between items-center mb-8">
-                                    <h2 className="text-xl font-bold text-slate-800 tracking-tight">Nueva Identidad</h2>
-                                    <button type="button" onClick={() => setIsCreateClientModalOpen(false)} className="p-2 hover:bg-slate-50 rounded-full text-slate-300"><X size={20} /></button>
-                                </div>
-
-                                <div className="space-y-5">
-                                    <div className="space-y-1.5">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] ml-1">Nombre y Apellido</label>
-                                        <input required name="name" type="text" className="w-full px-4 py-3.5 bg-slate-50/50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary/20 outline-none transition-all font-medium text-slate-800" />
+                    isDesktop ? (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsCreateClientModalOpen(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
+                            <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="relative bg-white dark:bg-slate-900 w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-800">
+                                <form onSubmit={handleCreateClient} className="p-8">
+                                    <div className="flex justify-between items-center mb-8">
+                                        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Nueva Identidad</h2>
+                                        <button type="button" onClick={() => setIsCreateClientModalOpen(false)} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full text-slate-300 dark:text-slate-500"><X size={20} /></button>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
+
+                                    <div className="space-y-5">
                                         <div className="space-y-1.5">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] ml-1">Identificación</label>
-                                            <input required name="doc" type="text" placeholder="V-000000" className="w-full px-4 py-3.5 bg-slate-50/50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary/20 outline-none transition-all font-medium text-slate-800" />
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] ml-1">Nombre y Apellido</label>
+                                            <input required name="name" type="text" className="w-full px-4 py-3.5 bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary/20 outline-none transition-all font-medium text-slate-800 dark:text-slate-100" />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-1.5">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] ml-1">Identificación</label>
+                                                <input required name="doc" type="text" placeholder="V-000000" className="w-full px-4 py-3.5 bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary/20 outline-none transition-all font-medium text-slate-800 dark:text-slate-100" />
+                                            </div>
+                                            <div className="space-y-1.5">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] ml-1">Móvil</label>
+                                                <input name="phone" type="tel" className="w-full px-4 py-3.5 bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary/20 outline-none transition-all font-medium text-slate-800 dark:text-slate-100" />
+                                            </div>
                                         </div>
                                         <div className="space-y-1.5">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] ml-1">Móvil</label>
-                                            <input name="phone" type="tel" className="w-full px-4 py-3.5 bg-slate-50/50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary/20 outline-none transition-all font-medium text-slate-800" />
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] ml-1">Correo (Opcional)</label>
+                                            <input name="email" type="email" className="w-full px-4 py-3.5 bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary/20 outline-none transition-all font-medium text-slate-800 dark:text-slate-100" />
                                         </div>
                                     </div>
-                                    <div className="space-y-1.5">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] ml-1">Correo (Opcional)</label>
-                                        <input name="email" type="email" className="w-full px-4 py-3.5 bg-slate-50/50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary/20 outline-none transition-all font-medium text-slate-800" />
-                                    </div>
-                                </div>
 
-                                <button type="submit" className="w-full mt-10 py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.01] active:scale-95 transition-all text-sm">
-                                    Registrar y Seleccionar
-                                </button>
-                            </form>
-                        </motion.div>
-                    </div>
+                                    <button type="submit" className="w-full mt-10 py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.01] active:scale-95 transition-all text-sm">
+                                        Registrar y Seleccionar
+                                    </button>
+                                </form>
+                            </motion.div>
+                        </div>
+                    ) : (
+                        /* Versión móvil: Drawer inferior para crear cliente rápido */
+                        <Drawer.Root open={isCreateClientModalOpen} onOpenChange={(open) => !open && setIsCreateClientModalOpen(false)}>
+                            <Drawer.Portal>
+                                <Drawer.Overlay className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100]" />
+                                <Drawer.Content className="bg-white dark:bg-slate-900 flex flex-col rounded-t-[2.5rem] mt-24 fixed bottom-0 left-0 right-0 z-[110] focus:outline-none max-h-[96vh]">
+                                    {/* Indicador de arrastre */}
+                                    <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-slate-200 dark:bg-slate-700 my-4" />
+                                    <div className="px-6 pb-2">
+                                        <Drawer.Title className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+                                            Nueva Identidad
+                                        </Drawer.Title>
+                                    </div>
+                                    <div className="flex-1 overflow-y-auto pb-8">
+                                        <form onSubmit={handleCreateClient} className="px-6 pt-4">
+                                            <div className="space-y-5">
+                                                <div className="space-y-1.5">
+                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] ml-1">Nombre y Apellido</label>
+                                                    <input required name="name" type="text" className="w-full px-4 py-3.5 bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary/20 outline-none transition-all font-medium text-slate-800 dark:text-slate-100" />
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] ml-1">Identificación</label>
+                                                        <input required name="doc" type="text" placeholder="V-000000" className="w-full px-4 py-3.5 bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary/20 outline-none transition-all font-medium text-slate-800 dark:text-slate-100" />
+                                                    </div>
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] ml-1">Móvil</label>
+                                                        <input name="phone" type="tel" className="w-full px-4 py-3.5 bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary/20 outline-none transition-all font-medium text-slate-800 dark:text-slate-100" />
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-1.5">
+                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] ml-1">Correo (Opcional)</label>
+                                                    <input name="email" type="email" className="w-full px-4 py-3.5 bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary/20 outline-none transition-all font-medium text-slate-800 dark:text-slate-100" />
+                                                </div>
+                                            </div>
+
+                                            <button type="submit" className="w-full mt-10 py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.01] active:scale-95 transition-all text-sm">
+                                                Registrar y Seleccionar
+                                            </button>
+                                        </form>
+                                    </div>
+                                </Drawer.Content>
+                            </Drawer.Portal>
+                        </Drawer.Root>
+                    )
                 )}
             </AnimatePresence>
+
+            {/* --- Modal de confirmación para reemplazar carrito con orden pendiente --- */}
+            <ConfirmationModal
+                isOpen={!!pendingOrderToLoad}
+                onClose={() => setPendingOrderToLoad(null)}
+                onConfirm={() => {
+                    if (pendingOrderToLoad) {
+                        executeLoadPendingOrder(pendingOrderToLoad);
+                        setPendingOrderToLoad(null);
+                    }
+                }}
+                title="Reemplazar carrito"
+                description="Esto reemplazará los ítems actuales en el carrito. ¿Deseas continuar?"
+                confirmText="Sí, reemplazar"
+                cancelText="No, volver"
+            />
 
             <style jsx global>{`
                 .custom-scrollbar::-webkit-scrollbar { width: 4px; }

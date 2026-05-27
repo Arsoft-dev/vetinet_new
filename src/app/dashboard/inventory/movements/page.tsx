@@ -2,16 +2,54 @@ import { getInventoryMovements } from "@/actions/inventory";
 import { MovementsTable } from "@/components/dashboard/inventory/MovementsTable";
 import { ArrowLeft, History } from "lucide-react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export default async function MovementsPage({
     searchParams,
 }: {
-    searchParams: Promise<{ productId?: string }>;
+    searchParams: Promise<{ productId?: string; warehouseId?: string }>;
 }) {
     const sp = await searchParams;
     const productId = sp.productId;
+    const warehouseId = sp.warehouseId;
 
-    const movements = await getInventoryMovements(1000, productId);
+    const supabase = await createClient();
+    const supabaseAdmin = createAdminClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    let role = 'staff';
+    let filterWarehouseId = warehouseId;
+
+    if (user) {
+        const { data: member } = await supabaseAdmin
+            .from("clinic_members")
+            .select("role, clinic_id")
+            .eq("user_id", user.id)
+            .single();
+        if (member) {
+            role = member.role;
+            if (role === 'vet') {
+                // Forzar filtro para veterinarios
+                const { data: consultingWarehouses } = await supabaseAdmin
+                    .from("warehouses")
+                    .select("id")
+                    .eq("clinic_id", member.clinic_id)
+                    .eq("type", "consulting")
+                    .eq("is_active", true);
+
+                if (consultingWarehouses && consultingWarehouses.length > 0) {
+                    if (warehouseId && consultingWarehouses.some(w => w.id === warehouseId)) {
+                        filterWarehouseId = warehouseId;
+                    } else {
+                        filterWarehouseId = consultingWarehouses[0].id;
+                    }
+                }
+            }
+        }
+    }
+
+    const movements = await getInventoryMovements(1000, productId, filterWarehouseId);
 
     return (
         <div className="space-y-6">

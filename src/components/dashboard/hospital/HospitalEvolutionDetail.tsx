@@ -8,6 +8,7 @@ import { addHospitalRound, dischargePet } from "@/actions/hospital";
 
 import { Drawer } from "vaul";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { ConsultationInventoryManager } from "@/components/dashboard/inventory/ConsultationInventoryManager";
 
 interface Round {
     id: string;
@@ -43,7 +44,8 @@ export function HospitalEvolutionDetail({ hospital, rounds }: HospitalEvolutionD
                 fc: formData.get("fc") as string,
                 fr: formData.get("fr") as string,
             },
-            exams: formData.getAll("exams") as string[]
+            exams: formData.getAll("exams") as string[],
+            inventoryItems: formData.get("inventoryItems") as string
         };
 
         startTransition(async () => {
@@ -111,6 +113,9 @@ export function HospitalEvolutionDetail({ hospital, rounds }: HospitalEvolutionD
                     ))}
                 </div>
             </div>
+
+            <ConsultationInventoryManager />
+
             <button type="submit" disabled={isPending} className="w-full py-4 bg-primary text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all">
                 {isPending ? "Registrando..." : <><Plus size={20} /> Guardar Ronda</>}
             </button>

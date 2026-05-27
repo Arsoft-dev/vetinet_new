@@ -254,13 +254,17 @@ export function SettingsView({ userRole, currentUser }: { userRole: string, curr
         { id: 'profile', label: 'Mi Perfil', icon: <UserCircle2 size={18} /> },
         { id: 'security', label: 'Seguridad', icon: <ShieldCheck size={18} /> },
         { id: 'clinic', label: 'Clínica', icon: <Building2 size={18} />, adminOnly: true },
-        { id: 'finance', label: 'Finanzas', icon: <DollarSign size={18} />, adminOnly: true },
+        { id: 'finance', label: 'Finanzas', icon: <DollarSign size={18} />, adminOnly: true, billingOnly: true },
         { id: 'team', label: 'Equipo', icon: <Users size={18} />, adminOnly: true },
         { id: 'appointments', label: 'Citas', icon: <Calendar size={18} />, adminOnly: true },
         { id: 'communication', label: 'Comunicación', icon: <MessageSquare size={18} />, adminOnly: true },
     ];
 
-    const visibleTabs = allTabs.filter(t => !t.adminOnly || isAdmin);
+    const visibleTabs = allTabs.filter(t => {
+        if (t.adminOnly && !isAdmin) return false;
+        if ((t as any).billingOnly && clinic && clinic.billing_enabled === false) return false;
+        return true;
+    });
 
     if (isLoading) return (
         <div className="flex items-center justify-center p-20 text-slate-400">
